@@ -1,0 +1,3984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>漂流本 · 复古贴纸手账</title>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Caveat:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2';document.head.appendChild(s);"></script>
+<script>
+// 全局错误捕获 - 任何JS错误都显示在页面上
+window.addEventListener('error', function(e) {
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff4444;color:#fff;padding:12px;font-size:13px;font-family:monospace;word-break:break-all;';
+  d.textContent = 'JS错误: ' + (e.message || '未知错误') + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '');
+  document.body.appendChild(d);
+});
+</script>
+<style>
+/* ========== 1. 全局主题变量 ========== */
+:root {
+  --bg-deep: #f5ead6;
+  --bg-deep-2: #ede0c8;
+  --bg-card: #fffbf2;
+  --bg-card-hover: #f5eddf;
+  --bg-paper: #fff9ec;
+  --bg-paper-dark: #f0e6d0;
+  --accent: #c8853d;
+  --accent-dim: #a86d2e;
+  --accent-glow: rgba(200,133,61,0.25);
+  --text-primary: #4a3a2a;
+  --text-secondary: #7a6858;
+  --text-muted: #a89a88;
+  --text-ink: #3b2e24;
+  --stamp-gold: #c4954a;
+  --stamp-red: #c45a4e;
+  --stamp-blue: #5a8ab5;
+  --stamp-green: #6daa7d;
+  --stamp-purple: #9175b0;
+  --stamp-error: #b8443a;
+  --collab-blue: rgba(90,138,181,0.25);
+  --border-subtle: #ddd0bb;
+  --border-paper: #cbb08d;
+  --font-hand: 'Ma Shan Zheng', 'KaiTi', cursive;
+  --font-type: 'Courier New', 'SF Mono', monospace;
+  --font-doodle: 'Caveat', 'Ma Shan Zheng', cursive;
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-organic: 6px 14px 10px 18px;
+  --shadow-card: 0 4px 14px rgba(120,100,75,0.12);
+  --shadow-float: 0 8px 28px rgba(120,100,75,0.18);
+  --tab-height: 56px;
+  --header-height: 44px;
+  --sticker-shadow: 2px 3px 0 rgba(120,100,75,0.18);
+}
+
+/* ========== 2. Reset & Base (复古报纸风) ========== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-type);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* 通用 sticker 风格 */
+.sticker-style {
+  border: 2px solid rgba(120,100,75,0.2);
+  box-shadow: var(--sticker-shadow);
+  border-radius: 50%;
+  background: var(--bg-paper);
+}
+/* 齿孔邮票效果 */
+.stamp-scallop {
+  position: relative;
+  border-radius: 50%;
+  background: var(--bg-card);
+  box-shadow: inset 0 0 0 2px var(--accent), 0 3px 8px rgba(0,0,0,0.25);
+}
+.stamp-scallop::before {
+  content: '';
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 6px, var(--bg-card) 7px);
+  background-size: 14px 14px;
+  z-index: -1;
+  mask: radial-gradient(circle, transparent 5px, black 6px);
+  -webkit-mask: radial-gradient(circle, transparent 5px, black 6px);
+}
+
+/* ========== 3. App Shell - 复古报纸纹理 ========== */
+#app {
+  position: relative; width: 100%; height: 100%;
+  max-width: 480px; margin: 0 auto;
+  display: flex; flex-direction: column;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+#app::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(180,160,120,0.06) 1px, transparent 1px);
+  background-size: auto, 100% 28px;
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+.app-header {
+  height: var(--header-height);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 10;
+  background: rgba(245,234,214,0.88);
+  backdrop-filter: blur(6px);
+}
+.app-header .title {
+  font-family: var(--font-doodle);
+  font-size: 18px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+.app-header .settings-btn {
+  width: 28px; height: 28px;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 50%; color: var(--accent); font-size: 14px;
+  cursor: pointer; opacity: 0.9;
+}
+.page-container {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+  z-index: 1;
+}
+.page {
+  display: none;
+  min-height: 100%;
+  padding: 16px;
+  padding-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== 4. Bottom Tab Bar - 贴纸胶囊风 ========== */
+#tab-bar {
+  height: var(--tab-height);
+  display: flex; align-items: stretch;
+  background: rgba(245,234,214,0.92);
+  border-top: 1px solid var(--border-subtle);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  backdrop-filter: blur(8px);
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; cursor: pointer;
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 9px; font-family: var(--font-type);
+  transition: all 0.2s;
+  position: relative;
+}
+.tab-item .tab-icon { font-size: 20px; line-height: 1; transition: transform 0.2s; }
+.tab-item.active { color: var(--accent); }
+.tab-item.active .tab-icon { transform: translateY(-2px) scale(1.15); filter: drop-shadow(0 2px 4px var(--accent-glow)); }
+.tab-item.active::after {
+  content: '';
+  position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ========== 5. Shared Components ========== */
+/* 卡片基础 */
+.card-surface {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+.card-surface:hover { background: var(--bg-card-hover); }
+
+/* 按钮 */
+.btn-primary {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 40px;
+  padding: 10px 20px; font-weight: 700;
+  cursor: pointer; transition: 0.2s;
+  font-family: var(--font-type);
+}
+.btn-primary:hover { background: var(--accent-dim); transform: translateY(-1px); }
+.btn-outline {
+  background: none; color: var(--text-secondary);
+  border: 1px solid var(--text-secondary);
+  border-radius: 40px; padding: 8px 16px;
+  cursor: pointer; transition: 0.2s;
+  font-family: var(--font-type);
+}
+.btn-outline:hover { background: var(--text-secondary); color: #fff; }
+.btn-small {
+  background: var(--bg-card); color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 11px; cursor: pointer;
+  transition: 0.15s;
+}
+.btn-small:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+
+/* 标签 */
+.tag {
+  display: inline-block;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-family: var(--font-type);
+  background: var(--bg-card); color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+.tag-accent {
+  background: var(--accent); color: #fff;
+  border-color: var(--accent);
+}
+
+/* 输入框 */
+.input-dark {
+  width: 100%;
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-type);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-dark:focus { border-color: var(--accent); }
+.input-dark::placeholder { color: var(--text-muted); }
+textarea.input-dark { resize: none; min-height: 80px; }
+
+/* 鼓励弹窗 */
+.toast-encourage {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-card); color: var(--accent);
+  padding: 12px 24px; border-radius: var(--radius-md);
+  font-family: var(--font-doodle);
+  font-size: 14px; font-weight: 700;
+  box-shadow: var(--shadow-float);
+  opacity: 0; pointer-events: none;
+  transition: all 0.4s ease;
+  z-index: 200; max-width: 90%;
+  text-align: center;
+}
+.toast-encourage.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-muted);
+  font-family: var(--font-doodle);
+  font-size: 15px;
+}
+.empty-state .empty-icon { font-size: 48px; opacity: 0.4; margin-bottom: 12px; }
+
+/* ========== 6. PAGE 1: 明信片创建页 ========== */
+/* 创建表单 */
+.create-form { margin-bottom: 24px; }
+.create-form .form-title {
+  font-family: var(--font-doodle);
+  font-size: 16px; color: var(--accent);
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.create-form .photo-upload-area {
+  width: 100%; height: 160px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; overflow: hidden;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.create-form .photo-upload-area:hover { border-color: var(--accent); }
+.create-form .photo-upload-area.has-image { border-style: solid; border-color: var(--accent); }
+.create-form .photo-upload-area .upload-hint {
+  color: var(--text-muted); font-size: 13px;
+  font-family: var(--font-doodle);
+  text-align: center;
+}
+.create-form .photo-upload-area .upload-hint .upload-icon { font-size: 32px; opacity: 0.5; }
+.create-form .photo-upload-area img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.create-form .form-row {
+  display: flex; gap: 12px; margin-top: 12px;
+}
+.create-form .form-row > * { flex: 1; }
+.create-form .form-label {
+  display: block; margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-size: 11px; letter-spacing: 1px;
+}
+.create-form textarea.input-dark {
+  min-height: 100px;
+  font-family: var(--font-hand);
+  font-size: 14px;
+  margin-top: 12px;
+}
+.create-form .submit-row {
+  display: flex; gap: 12px; margin-top: 16px;
+  justify-content: center;
+}
+
+/* 明信片画廊 - 涂鸦风格 */
+.postcard-gallery-title {
+  font-family: var(--font-doodle);
+  font-size: 15px; color: var(--text-secondary);
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.postcard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.postcard-item {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.postcard-item:hover { transform: scale(1.02); }
+
+/* 邮票标记列表 */
+.stamp-list {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.stamp-marker {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--radius-organic);
+  background: var(--bg-card);
+  cursor: pointer; transition: 0.2s;
+  position: relative;
+}
+.stamp-marker::before {
+  content: ''; position: absolute;
+  top: -2px; right: -2px; bottom: -2px; left: -2px;
+  border-radius: 8px 14px 10px 18px;
+  border: 2px dashed;
+  opacity: 0.5;
+}
+.stamp-marker.stamp-gold::before { border-color: var(--stamp-gold); }
+.stamp-marker.stamp-red::before { border-color: var(--stamp-red); }
+.stamp-marker.stamp-blue::before { border-color: var(--stamp-blue); }
+.stamp-marker.stamp-green::before { border-color: var(--stamp-green); }
+.stamp-marker .stamp-emoji { font-size: 16px; }
+.stamp-marker .stamp-city {
+  font-family: var(--font-doodle);
+  font-size: 12px; color: var(--text-primary);
+}
+.stamp-marker .stamp-date {
+  font-family: var(--font-type);
+  font-size: 9px; color: var(--text-muted);
+}
+.stamp-marker.collab { box-shadow: 0 0 8px var(--collab-blue); }
+
+/* ========== 明信片翻转卡片 ========== */
+.flip-card-wrapper {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.flip-card {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  perspective: 800px;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+.flip-card-front, .flip-card-back {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* 正面 - 涂鸦画框风格 */
+.flip-card-front {
+  background: var(--bg-deep);
+  display: flex; align-items: center; justify-content: center;
+}
+.flip-card-front .photo-frame {
+  width: 92%; height: 88%;
+  position: relative;
+  border-radius: var(--radius-organic);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(120,100,75,0.2);
+}
+/* 涂鸦边框效果 - 加强手绘质感 */
+.flip-card-front .photo-frame::before {
+  content: '';
+  position: absolute; inset: -4px;
+  border-radius: 7px 17px 11px 21px;
+  border: 3px solid var(--accent);
+  opacity: 0.6;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(200,133,61,0.2));
+}
+.flip-card-front .photo-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.flip-card-front .photo-frame .no-photo {
+  width: 100%; height: 100%;
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  font-family: var(--font-doodle); font-size: 14px;
+}
+/* 邮戳覆盖 - 增加做旧质感 */
+.flip-card-front .postmark-overlay {
+  position: absolute; bottom: 8px; right: 8px;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 3px solid var(--stamp-red);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: var(--font-type);
+  font-size: 8px; color: #8b2a1a;
+  background: radial-gradient(circle, rgba(200,70,40,0.2) 0%, transparent 70%);
+  transform: rotate(-6deg);
+  z-index: 3;
+  text-shadow: 0.5px 0.5px rgba(0,0,0,0.1);
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
+  box-shadow: 0 0 0 2px rgba(200,80,50,0.15), inset 0 0 10px rgba(150,40,20,0.2);
+}
+.flip-card-front .postmark-overlay .pm-city {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px;
+}
+.flip-card-front .postmark-overlay .pm-emoji { font-size: 16px; }
+
+/* 涂鸦装饰 - 更丰富的涂鸦元素 */
+.flip-card-front .doodle-deco {
+  position: absolute; top: 8px; left: 8px;
+  font-family: var(--font-doodle);
+  font-size: 14px; color: var(--accent);
+  opacity: 0.6; z-index: 3;
+  transform: rotate(-3deg);
+  filter: drop-shadow(0 1px 2px rgba(200,133,61,0.2));
+}
+/* 日期水印 */
+.flip-card-front .doodle-date {
+  position: absolute; top: 8px; right: 76px;
+  font-family: var(--font-type);
+  font-size: 9px; color: rgba(155,142,124,0.4);
+  z-index: 3; transform: rotate(2deg);
+}
+/* 底部小印章 */
+.flip-card-front .mini-seal {
+  position: absolute; bottom: 8px; left: 8px;
+  font-family: var(--font-doodle);
+  font-size: 10px; color: var(--stamp-gold);
+  opacity: 0.4; z-index: 3;
+  transform: rotate(-5deg);
+  border: 1px solid var(--stamp-gold);
+  padding: 2px 6px; border-radius: 4px 6px 3px 7px;
+}
+
+/* 背面 - 手写复古信纸（加强质感） */
+.flip-card-back {
+  transform: rotateY(180deg);
+  background: var(--bg-paper);
+  background-image:
+    radial-gradient(circle at 30% 40%, rgba(200,170,110,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(200,170,110,0.03) 0%, transparent 40%),
+    repeating-linear-gradient(
+      transparent, transparent 27px,
+      rgba(180,160,120,0.15) 27px, rgba(180,160,120,0.15) 28px
+    );
+  padding: 16px;
+  font-family: var(--font-hand);
+  box-shadow: inset 0 0 30px rgba(180,160,120,0.06);
+}
+.flip-card-back .back-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 12px;
+}
+/* 邮编格子 */
+.postcode-box {
+  display: flex; gap: 3px;
+}
+.postcode-box .pc-cell {
+  width: 16px; height: 20px;
+  border: 1px solid var(--stamp-error);
+  background: rgba(245,235,210,0.3);
+}
+/* 邮票区 */
+.back-stamp {
+  width: 52px; height: 64px;
+  background: #fef3e0;
+  border: 1px dashed var(--stamp-gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; opacity: 0.5;
+  transform: rotate(2deg);
+}
+/* 信纸横线区 */
+.letter-area {
+  position: relative;
+  flex: 1; margin-top: 8px;
+  min-height: 140px;
+}
+.letter-text {
+  font-family: var(--font-hand);
+  font-size: 14px; line-height: 28px;
+  color: var(--text-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  transform: rotate(0.3deg);
+  letter-spacing: 0.5px;
+}
+/* 底部标识 */
+.back-footer {
+  display: flex; justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-type);
+  font-size: 7px; color: var(--stamp-gold);
+  opacity: 0.7; margin-top: 8px;
+}
+/* 背面邮戳 - 增强做旧油墨质感 */
+.back-postmark {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--stamp-red);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: var(--font-type);
+  color: #8b2a1a;
+  transform: rotate(-8deg);
+  background: radial-gradient(circle at 30% 30%, rgba(200,70,40,0.3), rgba(180,50,30,0.1));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.12));
+  box-shadow: 0 0 0 2px rgba(200,80,50,0.2), inset 0 0 10px rgba(150,40,20,0.3);
+}
+.back-postmark .pm-city { font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+.back-postmark .pm-icon { font-size: 18px; margin-top: 2px; opacity: 0.85; }
+/* 邮戳磨损伪元素 */
+.back-postmark::after {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,0,0,0.08) 20%, transparent 70%);
+  pointer-events: none; filter: blur(1px);
+}
+.back-postmark::before {
+  content: '';
+  position: absolute; top: 2px; left: 2px;
+  width: 35%; height: 35%;
+  background: radial-gradient(circle, rgba(255,255,200,0.3) 0%, transparent 80%);
+  border-radius: 50%; pointer-events: none;
+}
+
+/* 卡片底部操作栏 */
+.card-actions {
+  padding: 10px 14px;
+  background: var(--bg-card);
+  display: flex; justify-content: space-between;
+  align-items: center;
+  gap: 8px; flex-wrap: wrap;
+}
+.card-actions .meta {
+  display: flex; gap: 6px; align-items: center;
+  font-size: 11px; color: var(--text-secondary);
+}
+.card-actions .action-btns { display: flex; gap: 6px; }
+
+/* ========== 明信片详情Overlay ========== */
+#postcard-overlay {
+  position: fixed; inset: 0;
+  background: rgba(60,50,40,0.8);
+  z-index: 150;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+#postcard-overlay.show { display: flex; }
+#postcard-overlay .overlay-card {
+  width: 100%; max-width: 380px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-float);
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.overlay-card .overlay-flip-area {
+  position: relative;
+  height: 360px;
+  perspective: 800px;
+}
+.overlay-card .overlay-actions {
+  padding: 12px 16px;
+  display: flex; gap: 8px;
+  justify-content: center; flex-wrap: wrap;
+}
+.overlay-card .overlay-close {
+  position: absolute; top: 8px; right: 8px;
+  width: 32px; height: 32px;
+  background: rgba(60,50,40,0.4); border: none;
+  color: #fff; border-radius: 50%;
+  font-size: 16px; cursor: pointer;
+  z-index: 5;
+}
+
+/* "写给未来" / "漂流给朋友" 弹窗 */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(60,50,40,0.65);
+  z-index: 180; display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  width: 100%; max-width: 320px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-float);
+  animation: fadeIn 0.2s ease;
+}
+.modal-box .modal-title {
+  font-family: var(--font-doodle);
+  font-size: 16px; color: var(--accent);
+  margin-bottom: 16px;
+}
+.modal-box .modal-options {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  justify-content: center;
+}
+.modal-box .modal-option {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  background: var(--bg-deep); border: 1px solid var(--border-subtle);
+  color: var(--text-primary); cursor: pointer;
+  transition: 0.2s; font-family: var(--font-type); font-size: 12px;
+  text-align: center;
+}
+.modal-box .modal-option:hover,
+.modal-box .modal-option.selected {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(200,133,61,0.1);
+}
+.modal-box .modal-input {
+  width: 100%; margin-bottom: 12px;
+}
+
+/* 漂流进度显示 */
+.drift-progress {
+  background: var(--bg-deep);
+  border-radius: var(--radius-sm);
+  padding: 12px; margin-top: 12px;
+}
+.drift-progress .drift-route {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--text-secondary);
+  overflow: hidden;
+}
+.drift-progress .drift-city {
+  padding: 3px 8px; border-radius: 12px;
+  background: var(--bg-card); font-family: var(--font-doodle);
+  font-size: 10px;
+}
+.drift-progress .drift-city.visited { color: var(--accent); border: 1px solid var(--accent); }
+.drift-progress .drift-city.current { color: var(--stamp-green); border: 1px solid var(--stamp-green); animation: pulse 1.5s infinite; }
+.drift-progress .drift-arrow { color: var(--text-muted); font-size: 10px; }
+@keyframes pulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 6px var(--stamp-green); } }
+
+/* ========== 7. PAGE 2: 贴纸日历页 ========== */
+.calendar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.calendar-header .month-label {
+  font-family: var(--font-doodle);
+  font-size: 16px; color: var(--accent);
+}
+.calendar-header .month-nav {
+  display: flex; gap: 8px;
+}
+.calendar-header .month-nav button {
+  width: 32px; height: 32px;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 50%; color: var(--text-secondary);
+  cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.calendar-grid .day-header {
+  text-align: center; font-size: 10px;
+  color: var(--text-muted); padding: 4px 0;
+  font-family: var(--font-type);
+}
+.calendar-grid .day-cell {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  min-height: 56px; padding: 4px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+  cursor: pointer; transition: background 0.15s;
+  position: relative;
+}
+.calendar-grid .day-cell:hover { background: var(--bg-card-hover); }
+.calendar-grid .day-cell.today {
+  border: 1px solid var(--accent);
+}
+.calendar-grid .day-cell .day-num {
+  font-size: 10px; color: var(--text-secondary);
+  font-family: var(--font-type);
+}
+.calendar-grid .day-cell .sticker-icons {
+  display: flex; gap: 2px; font-size: 14px;
+  flex-wrap: wrap; justify-content: center;
+}
+.calendar-grid .day-cell .sticker-note {
+  font-size: 8px; color: var(--text-muted);
+  font-family: var(--font-doodle);
+  text-align: center; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 贴纸库 */
+.sticker-bar {
+  margin-top: 12px;
+  display: flex; gap: 8px;
+  overflow-x: auto; padding: 8px 0;
+}
+.sticker-bar .sticker-item,
+.calendar-sticker-bar .sticker-item {
+  width: 44px; height: 44px;
+  background: var(--bg-paper);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; cursor: grab;
+  transition: 0.15s;
+  border: 2px solid rgba(120,100,75,0.2);
+  box-shadow: var(--sticker-shadow);
+  touch-action: none;
+}
+.sticker-bar .sticker-item:hover,
+.calendar-sticker-bar .sticker-item:hover { transform: scale(1.1) rotate(-3deg); }
+.sticker-bar .sticker-item.dragging { opacity: 0.5; transform: scale(1.2); }
+.sticker-bar .custom-sticker-btn,
+.calendar-sticker-bar .custom-sticker-btn {
+  width: 44px; height: 44px;
+  background: var(--bg-card);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--accent);
+  cursor: pointer; border: 2px dashed var(--accent);
+  font-family: var(--font-type);
+}
+
+/* ========== 8. PAGE 3: 今日任务页 ========== */
+.progress-bar-wrap {
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.progress-bar-track {
+  flex: 1; height: 4px;
+  background: var(--bg-card);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; background: var(--accent);
+  border-radius: 2px; transition: width 0.3s;
+}
+.progress-bar-label {
+  font-family: var(--font-type);
+  font-size: 11px; color: var(--accent);
+  min-width: 30px;
+}
+.progress-bar-title {
+  font-family: var(--font-doodle);
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.task-section {
+  margin-bottom: 16px;
+}
+.task-section .section-title {
+  font-family: var(--font-doodle);
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+.task-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: grab; touch-action: none;
+  transition: 0.15s;
+  border: 1px solid transparent;
+}
+.task-card:hover { border-color: var(--border-subtle); }
+.task-card.dragging { opacity: 0.4; transform: scale(0.95); }
+.task-card .task-check {
+  width: 20px; height: 20px;
+  border: 2px solid var(--text-muted);
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: 0.2s; flex-shrink: 0;
+}
+.task-card .task-check.checked {
+  border-color: var(--accent); background: var(--accent);
+  color: #fff; font-size: 12px;
+}
+.task-card .task-name {
+  font-family: var(--font-type);
+  font-size: 12px; color: var(--text-primary);
+  flex: 1;
+}
+.task-card .task-name.done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+.task-card .task-quadrant-tag {
+  font-size: 9px; padding: 2px 6px;
+  border-radius: 10px;
+  background: var(--bg-deep); color: var(--text-muted);
+}
+
+/* 四象限展开 */
+.quadrant-toggle {
+  text-align: center; margin-top: 8px;
+}
+.quadrant-grid {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-top: 12px;
+}
+.quadrant-grid.show { display: grid; }
+.quadrant-cell {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 8px; min-height: 80px;
+}
+.quadrant-cell .q-label {
+  font-family: var(--font-doodle);
+  font-size: 10px; color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.quadrant-cell.q-urgent-important { border: 1px solid var(--stamp-red); }
+.quadrant-cell.q-important-not-urgent { border: 1px solid var(--stamp-gold); }
+.quadrant-cell.q-urgent-not-important { border: 1px solid var(--stamp-blue); }
+.quadrant-cell.q-not-urgent-not-important { border: 1px solid var(--border-subtle); }
+
+/* ========== 9. PAGE 4: 牢骚信箱页 ========== */
+.mailbox-visual {
+  text-align: center; margin-bottom: 16px;
+  position: relative;
+}
+.mailbox-visual .mailbox-svg {
+  width: 120px; height: 140px;
+  margin: 0 auto;
+  display: block;
+}
+.mailbox-visual .mailbox-slot {
+  position: absolute; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  width: 50px; height: 8px;
+  background: #4a3a2a;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.mailbox-visual .mailbox-slot:hover { background: var(--accent); }
+.complaint-input-area {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 12px; margin-bottom: 16px;
+}
+.complaint-input-area textarea {
+  min-height: 60px;
+  font-family: var(--font-hand);
+  font-size: 13px;
+}
+.complaint-input-area .complaint-meta {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-top: 8px;
+}
+.emotion-selector {
+  display: flex; gap: 6px;
+}
+.emotion-selector .emo-btn {
+  font-size: 18px; cursor: pointer;
+  opacity: 0.4; transition: 0.15s;
+  background: none; border: none; padding: 2px;
+}
+.emotion-selector .emo-btn.selected { opacity: 1; transform: scale(1.2); }
+
+.complaint-list { margin-top: 8px; }
+.complaint-item {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px; margin-bottom: 6px;
+  position: relative;
+}
+.complaint-item .complaint-text {
+  font-family: var(--font-hand);
+  font-size: 13px; color: var(--text-primary);
+  line-height: 1.4;
+}
+.complaint-item .complaint-meta {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-top: 6px;
+  font-size: 10px; color: var(--text-muted);
+}
+.complaint-item .complaint-source {
+  font-family: var(--font-type);
+  font-size: 9px; color: var(--text-secondary);
+  border-radius: 10px; padding: 2px 8px;
+  background: var(--bg-deep);
+}
+.complaint-item .complaint-emos {
+  font-size: 14px; display: flex; gap: 4px;
+}
+.complaint-item .complaint-time {
+  font-family: var(--font-type);
+  font-size: 9px;
+}
+
+/* 情绪统计 */
+.emotion-stats {
+  margin-top: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+.emotion-stats .stats-title {
+  font-family: var(--font-doodle);
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.emotion-stats .stat-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.emotion-stats .stat-emo { font-size: 16px; }
+.emotion-stats .stat-bar-track {
+  flex: 1; height: 6px;
+  background: var(--bg-deep); border-radius: 3px;
+  overflow: hidden;
+}
+.emotion-stats .stat-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: var(--accent); transition: width 0.3s;
+}
+.emotion-stats .stat-count {
+  font-size: 10px; color: var(--text-muted);
+  font-family: var(--font-type); min-width: 20px;
+}
+
+/* ========== 10. PAGE 5: 回顾页 ========== */
+.review-toggle {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  justify-content: center;
+}
+.review-section {
+  margin-bottom: 20px;
+}
+.review-section .review-title {
+  font-family: var(--font-doodle);
+  font-size: 14px; color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+/* 贴纸云图 */
+.sticker-cloud {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; align-items: center;
+  gap: 8px; padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+}
+.sticker-cloud .cloud-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+}
+.sticker-cloud .cloud-item .cloud-emoji { transition: 0.2s; }
+.sticker-cloud .cloud-item .cloud-count {
+  font-family: var(--font-type);
+  font-size: 9px; color: var(--text-muted);
+}
+
+/* 四象限饼图 */
+.quadrant-pie {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  margin: 0 auto;
+  position: relative;
+  background: conic-gradient(
+    var(--stamp-red) 0deg,
+    var(--stamp-gold) 0deg,
+    var(--stamp-blue) 0deg,
+    var(--border-subtle) 0deg
+  );
+}
+.quadrant-pie .pie-center {
+  position: absolute; inset: 30%;
+  background: var(--bg-card);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-doodle);
+  font-size: 12px; color: var(--text-secondary);
+}
+
+/* 漂流轨迹简图 */
+.drift-trace {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex; align-items: center;
+  gap: 6px; overflow-x: auto;
+  flex-wrap: nowrap;
+}
+.drift-trace .trace-stamp {
+  width: 36px; height: 44px;
+  border-radius: 4px 8px 4px 10px;
+  border: 2px dashed;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 8px; gap: 1px;
+  background: rgba(255,249,236,0.6);
+}
+.drift-trace .trace-stamp .ts-emoji { font-size: 12px; }
+.drift-trace .trace-stamp .ts-name {
+  font-family: var(--font-doodle);
+  font-size: 7px; color: var(--text-secondary);
+}
+.drift-trace .trace-arrow {
+  color: var(--text-muted); font-size: 10px;
+}
+
+/* 鼓励文字 */
+.encourage-text {
+  text-align: center;
+  padding: 20px;
+  font-family: var(--font-doodle);
+  font-size: 15px; color: var(--accent);
+  line-height: 1.6;
+  max-width: 300px; margin: 0 auto;
+}
+
+/* ========== 11. 全局涂鸦装饰 ========== */
+.doodle-corner {
+  position: fixed; pointer-events: none;
+  font-family: var(--font-doodle);
+  color: var(--accent); opacity: 0.06;
+  font-size: 60px; z-index: 0;
+}
+.doodle-corner.top-right { top: 60px; right: 16px; transform: rotate(15deg); }
+.doodle-corner.bottom-left { bottom: 70px; left: 16px; transform: rotate(-12deg); }
+
+/* ========== 12. 纹理与质感 ========== */
+/* 浅色底噪纹理 */
+#app::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+  opacity: 0.5;
+}
+.page-container { z-index: 1; }
+#tab-bar { z-index: 100; }
+.app-header { z-index: 10; }
+
+/* 涂鸦手绘边框效果（用于表单卡片等） */
+.card-surface {
+  position: relative;
+  border: 1px solid var(--border-subtle);
+}
+.card-surface::after {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: calc(var(--radius-md) + 2px);
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, rgba(200,133,61,0.12), transparent 50%, rgba(200,133,61,0.06)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 明信片正面涂鸦画框加强 */
+.flip-card-front .photo-frame::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(200,133,61,0.08), transparent 60%);
+  pointer-events: none; z-index: 1;
+}
+
+/* 纸张褶皱效果 */
+.flip-card-back::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(180,160,120,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(180,160,120,0.04) 0%, transparent 40%);
+  pointer-events: none; z-index: 0;
+}
+
+/* 漂流路线 SVG 动画 */
+.drift-route-animated {
+  stroke-dasharray: 6 4;
+  stroke-dashoffset: 0;
+  animation: dashFlow 2s linear infinite;
+}
+@keyframes dashFlow {
+  to { stroke-dashoffset: -20; }
+}
+
+/* 页面切换微动画加强 */
+.page.active {
+  animation: pageSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes pageSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 贴纸拖拽浮动效果 */
+.sticker-item:active {
+  transform: scale(1.3) rotate(-5deg);
+  box-shadow: 0 4px 12px rgba(200,133,61,0.3);
+}
+
+/* 任务卡片完成动画 */
+.task-check.checked {
+  animation: checkPop 0.3s ease;
+}
+@keyframes checkPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* 信箱投递动画 */
+.mailbox-slot:active {
+  transform: scaleY(1.5);
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* 回顾饼图渐入 */
+.quadrant-pie {
+  animation: pieGrow 0.6s ease;
+}
+@keyframes pieGrow {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ========== 13. 朋友/朋友圈/账户页 ========== */
+.social-tabs {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  background: var(--bg-card); padding: 4px;
+  border-radius: 40px;
+}
+.social-tab {
+  flex: 1; padding: 8px; border: none; border-radius: 40px;
+  background: transparent; color: var(--text-muted);
+  font-family: var(--font-type); font-size: 12px; cursor: pointer;
+}
+.social-tab.active { background: var(--accent); color: #fff; font-weight: 700; }
+.social-panel { display: none; }
+.social-panel.active { display: block; animation: fadeIn 0.25s ease; }
+
+/* Feed 发布器 */
+.feed-composer { margin-bottom: 16px; }
+.feed-composer-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.avatar-small {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bg-deep-2); display: flex; align-items: center; justify-content: center;
+  font-size: 14px; border: 2px solid rgba(120,100,75,0.2);
+  box-shadow: var(--sticker-shadow);
+}
+.composer-name { font-weight: 700; color: var(--text-primary); }
+.feed-photo-upload {
+  width: 100%; height: 120px; border-radius: var(--radius-md);
+  border: 2px dashed var(--border-subtle); display: flex;
+  align-items: center; justify-content: center; cursor: pointer;
+  background: var(--bg-deep-2); margin-bottom: 10px;
+}
+.feed-upload-hint { text-align: center; color: var(--text-muted); }
+.feed-upload-hint span { display: block; font-family: var(--font-doodle); font-size: 15px; color: var(--accent); }
+.feed-upload-hint small { font-size: 10px; }
+.feed-sticker-preview { text-align: center; margin-bottom: 10px; }
+.feed-sticker-preview img {
+  max-width: 140px; max-height: 140px; border-radius: 50%;
+  border: 3px solid rgba(120,100,75,0.2); box-shadow: var(--sticker-shadow);
+  background: var(--bg-paper);
+}
+.feed-composer-actions { text-align: right; }
+
+/* Feed 列表 */
+.feed-list { display: flex; flex-direction: column; gap: 14px; }
+.feed-item {
+  background: var(--bg-card); border-radius: var(--radius-md);
+  padding: 14px; box-shadow: var(--shadow-card);
+}
+.feed-item-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.feed-author-name { font-weight: 700; color: var(--text-primary); }
+.feed-time { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+.feed-sticker {
+  display: inline-block; width: 140px; height: 140px; border-radius: 50%;
+  border: 3px solid rgba(120,100,75,0.2); box-shadow: var(--sticker-shadow);
+  background: var(--bg-paper); overflow: hidden;
+}
+.feed-sticker img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.feed-caption {
+  margin-top: 10px; color: var(--text-secondary);
+  font-family: var(--font-doodle); font-size: 14px; line-height: 1.5;
+}
+.feed-actions { margin-top: 10px; display: flex; gap: 12px; }
+.feed-like-btn {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-size: 12px; display: flex; align-items: center; gap: 4px;
+}
+.feed-like-btn.liked { color: var(--stamp-red); }
+
+/* 好友 */
+.friend-search { margin-bottom: 16px; }
+.friend-search-row { display: flex; gap: 8px; margin-top: 8px; }
+.friend-search-row input { flex: 1; }
+.friend-search-row .btn-primary { padding: 8px 14px; }
+.friend-hint { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+.friend-list-title { font-family: var(--font-doodle); color: var(--accent); margin-bottom: 8px; }
+.friend-list { display: flex; flex-direction: column; gap: 10px; }
+.friend-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-card); padding: 10px 12px; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.friend-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--bg-deep-2); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border: 2px solid rgba(120,100,75,0.2); box-shadow: var(--sticker-shadow);
+}
+.friend-info { flex: 1; }
+.friend-name { font-weight: 700; color: var(--text-primary); }
+.friend-handle { font-size: 10px; color: var(--text-muted); }
+.friend-actions { display: flex; gap: 6px; }
+.friend-actions .btn-small { padding: 4px 8px; font-size: 10px; }
+
+/* 我的资料 */
+.profile-card { margin-bottom: 16px; }
+.profile-header { display: flex; gap: 12px; }
+.profile-avatar {
+  width: 60px; height: 60px; border-radius: 50%; flex-shrink: 0;
+  background: var(--bg-deep-2); display: flex; align-items: center; justify-content: center;
+  font-size: 32px; border: 3px solid rgba(120,100,75,0.2); box-shadow: var(--sticker-shadow);
+}
+.profile-info { flex: 1; }
+.profile-name {
+  font-weight: 700; font-size: 14px; margin-bottom: 4px;
+}
+.profile-handle {
+  font-size: 11px; color: var(--accent); margin-bottom: 6px;
+}
+.profile-bio {
+  min-height: 44px; font-size: 12px; color: var(--text-secondary);
+}
+.profile-actions { display: flex; gap: 8px; margin-top: 12px; }
+.qr-card { text-align: center; margin-bottom: 16px; }
+.qr-title { font-family: var(--font-doodle); color: var(--accent); margin-bottom: 8px; }
+.qr-card canvas { border-radius: var(--radius-sm); background: #fff; padding: 8px; }
+.qr-handle { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+.me-stats {
+  display: flex; justify-content: space-around; padding: 14px;
+}
+.stat-item { text-align: center; }
+.stat-num { display: block; font-size: 20px; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 10px; color: var(--text-muted); }
+
+/* ========== 14. 共创日历 ========== */
+.calendar-mode-tabs {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.calendar-mode-tab {
+  flex: 1; padding: 8px; border: 1px solid var(--border-subtle);
+  background: var(--bg-card); color: var(--text-secondary);
+  border-radius: 20px; font-family: var(--font-type); font-size: 11px; cursor: pointer;
+}
+.calendar-mode-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.shared-calendar-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.shared-calendar-card {
+  background: var(--bg-card); border-radius: var(--radius-md);
+  padding: 12px; box-shadow: var(--shadow-card);
+}
+.shared-calendar-card .sc-title { font-weight: 700; color: var(--text-primary); }
+.shared-calendar-card .sc-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+.shared-calendar-card .sc-members { display: flex; margin-top: 8px; }
+.shared-calendar-card.active { box-shadow: 0 0 0 2px var(--accent), var(--shadow-card); }
+.sc-members .avatar-small { margin-left: -6px; border: 2px solid var(--bg-card); }
+.sc-members .avatar-small:first-child { margin-left: 0; }
+.calendar-sticker-bar {
+  display: flex; gap: 8px; overflow-x: auto; padding: 8px 0;
+}
+.calendar-sticker-bar .sticker-item {
+  flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--bg-paper); display: flex; align-items: center; justify-content: center;
+  font-size: 22px; border: 2px solid rgba(255,255,255,0.9); box-shadow: var(--sticker-shadow);
+  cursor: pointer; transition: transform 0.15s;
+}
+.calendar-sticker-bar .sticker-item:hover { transform: scale(1.1); }
+.calendar-sticker-bar .sticker-item.selected { box-shadow: 0 0 0 3px var(--accent), var(--sticker-shadow); }
+
+/* ========== 15. 响应式 ========== */
+@media (min-width: 481px) {
+  #app {
+    border-left: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+  }
+}
+@media (max-height: 600px) {
+  .flip-card { height: 260px; }
+  .overlay-card .overlay-flip-area { height: 280px; }
+  .photo-upload-area { height: 120px; }
+}
+
+/* ========== 16. 登录/注册页 ========== */
+#auth-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-deep);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+#auth-screen::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: 0.5;
+}
+.auth-card {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 340px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-float);
+  border: 1px solid var(--border-subtle);
+}
+.auth-logo {
+  text-align: center; margin-bottom: 24px;
+}
+.auth-logo .logo-icon {
+  font-size: 48px; display: block; margin-bottom: 8px;
+}
+.auth-logo .logo-title {
+  font-family: var(--font-doodle);
+  font-size: 24px; color: var(--accent);
+  letter-spacing: 2px;
+}
+.auth-logo .logo-sub {
+  font-family: var(--font-type);
+  font-size: 11px; color: var(--text-muted);
+  margin-top: 4px;
+}
+.auth-tabs {
+  display: flex; gap: 4px; margin-bottom: 20px;
+  background: var(--bg-deep); padding: 4px;
+  border-radius: 40px;
+}
+.auth-tab {
+  flex: 1; padding: 8px; border: none; border-radius: 40px;
+  background: transparent; color: var(--text-muted);
+  font-family: var(--font-type); font-size: 12px; cursor: pointer;
+  transition: 0.2s;
+}
+.auth-tab.active { background: var(--accent); color: #fff; font-weight: 700; }
+.auth-form { display: flex; flex-direction: column; gap: 12px; }
+.auth-form input {
+  width: 100%;
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-type); font-size: 13px;
+  outline: none; transition: border-color 0.2s;
+}
+.auth-form input:focus { border-color: var(--accent); }
+.auth-form input::placeholder { color: var(--text-muted); }
+.auth-form .auth-handle-row {
+  display: flex; align-items: center; gap: 4px;
+}
+.auth-form .handle-prefix {
+  color: var(--text-muted); font-family: var(--font-type);
+  font-size: 14px; padding: 12px 0;
+}
+.auth-form .auth-btn {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 40px;
+  padding: 12px; font-weight: 700;
+  cursor: pointer; transition: 0.2s;
+  font-family: var(--font-type); font-size: 13px;
+  margin-top: 4px;
+}
+.auth-form .auth-btn:hover { background: var(--accent-dim); }
+.auth-form .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-error {
+  color: var(--stamp-error); font-size: 11px;
+  font-family: var(--font-type); text-align: center;
+  min-height: 16px;
+}
+.auth-hint {
+  text-align: center; font-size: 10px;
+  color: var(--text-muted); margin-top: 12px;
+  font-family: var(--font-doodle);
+}
+
+/* 用户信息栏（header 右侧） */
+.user-badge {
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer;
+}
+.user-badge .user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bg-deep-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; border: 2px solid rgba(120,100,75,0.2);
+  box-shadow: var(--sticker-shadow);
+}
+.logout-btn {
+  background: none; border: 1px solid var(--border-subtle);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 10px; color: var(--text-secondary);
+  cursor: pointer; font-family: var(--font-type);
+}
+
+/* 收到明信片标记 */
+.inbox-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--stamp-red); color: #fff;
+  font-size: 9px; min-width: 16px; height: 16px;
+  border-radius: 8px; display: flex;
+  align-items: center; justify-content: center;
+  padding: 0 4px; font-weight: 700;
+}
+
+/* 收到的明信片列表 */
+.received-postcards {
+  margin-bottom: 16px;
+}
+.received-postcards .rp-title {
+  font-family: var(--font-doodle);
+  font-size: 15px; color: var(--accent);
+  margin-bottom: 12px; letter-spacing: 1px;
+}
+.received-card {
+  background: var(--bg-card); border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-card);
+  margin-bottom: 12px; cursor: pointer;
+  border: 2px solid var(--stamp-gold);
+}
+.received-card.unread {
+  border-color: var(--stamp-red);
+  box-shadow: 0 0 8px rgba(196,90,78,0.2);
+}
+.received-card .rp-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-paper-dark);
+}
+.received-card .rp-sender {
+  font-weight: 700; font-size: 12px; color: var(--text-primary);
+}
+.received-card .rp-route {
+  font-size: 10px; color: var(--text-muted);
+}
+.received-card .rp-time {
+  margin-left: auto; font-size: 9px; color: var(--text-muted);
+}
+.received-card .rp-preview {
+  padding: 8px 12px; font-family: var(--font-hand);
+  font-size: 13px; color: var(--text-ink);
+  line-height: 1.4;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(245,234,214,0.9);
+  display: flex; align-items: center; justify-content: center;
+}
+.loading-overlay .loading-text {
+  font-family: var(--font-doodle);
+  font-size: 18px; color: var(--accent);
+}
+</style>
+</head>
+<body>
+
+<!-- 登录/注册页 -->
+<div id="auth-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-icon">📮</span>
+      <div class="logo-title">漂流本</div>
+      <div class="logo-sub">复古贴纸手账 · 和朋友互寄明信片</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login" onclick="AuthModule.switchMode('login')">登录</button>
+      <button class="auth-tab" data-mode="register" onclick="AuthModule.switchMode('register')">注册</button>
+    </div>
+    <div class="auth-form" id="authForm">
+      <input type="email" id="authEmail" placeholder="邮箱地址" autocomplete="email">
+      <input type="password" id="authPassword" placeholder="密码（至少6位）" autocomplete="current-password">
+      <div id="registerFields" style="display:none">
+        <div class="auth-handle-row">
+          <span class="handle-prefix">@</span>
+          <input type="text" id="authHandle" placeholder="你的ID（字母数字）" style="flex:1">
+        </div>
+        <input type="text" id="authName" placeholder="昵称（如：小咖啡）">
+      </div>
+      <button class="auth-btn" id="authSubmitBtn" onclick="AuthModule.submit()">✉️ 登录</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+    <div class="auth-hint">注册后你会获得专属 ID<br>朋友可以通过 ID 搜索到你</div>
+  </div>
+</div>
+
+<!-- 加载状态 -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="loading-text">正在加载...</div>
+</div>
+
+<div id="app">
+  <!-- 涂鸦装饰 -->
+  <div class="doodle-corner top-right" style="font-size:50px;opacity:0.06">✈️ 🌍</div>
+  <div class="doodle-corner bottom-left" style="font-size:44px;opacity:0.06">📮 ☕</div>
+
+  <!-- 顶部 -->
+  <header class="app-header">
+    <span class="title">漂流本</span>
+    <button class="settings-btn" aria-label="设置">⚙️</button>
+  </header>
+
+  <!-- 页面容器 -->
+  <div class="page-container">
+
+    <!-- ====== PAGE 1: 明信片创建 ====== -->
+    <section id="page-postcard" class="page active">
+      <!-- 创建表单 -->
+      <div class="create-form card-surface">
+        <div class="form-title">✏️ 写一张明信片</div>
+        <div class="photo-upload-area" id="photoUpload">
+          <div class="upload-hint" id="uploadHint">
+            <span class="upload-icon">📸</span><br>
+            上传一张照片
+          </div>
+          <input type="file" id="photoInput" accept="image/*" hidden>
+        </div>
+        <div class="form-row">
+          <div>
+            <label class="form-label">📍 地点</label>
+            <input class="input-dark" id="cardCity" placeholder="如：巴黎、东京" value="">
+          </div>
+          <div>
+            <label class="form-label">⏳ 到达天数</label>
+            <input class="input-dark" id="cardDays" type="number" value="30" min="0" max="365">
+          </div>
+        </div>
+        <label class="form-label" style="margin-top:12px">✍️ 手写留言</label>
+        <textarea class="input-dark" id="cardMessage" placeholder="在这里写下你想说的话……"></textarea>
+        <div class="submit-row">
+          <button class="btn-primary" id="createBtn">✉️ 寄出明信片</button>
+        </div>
+      </div>
+
+      <!-- 邮票标记列表 -->
+      <div class="stamp-list" id="stampList"></div>
+
+      <!-- 明信片画廊 -->
+      <div class="postcard-gallery-title">📬 我的明信片册</div>
+      <div class="postcard-grid" id="postcardGrid"></div>
+      <div class="empty-state" id="emptyPostcards" style="display:none">
+        <span class="empty-icon">📮</span><br>
+        还没有明信片<br>写一张寄给未来吧~
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <button class="btn-outline" id="clearAllBtn">🗑️ 清空全部</button>
+      </div>
+    </section>
+
+    <!-- ====== PAGE 2: 贴纸日历 ====== -->
+    <section id="page-calendar" class="page">
+      <div class="calendar-mode-tabs">
+        <button class="calendar-mode-tab active" data-calmode="personal">我的贴纸</button>
+        <button class="calendar-mode-tab" data-calmode="shared">共创日历</button>
+      </div>
+
+      <!-- 个人日历 -->
+      <div id="personalCalendar">
+        <div class="calendar-header">
+          <span class="month-label" id="calMonthLabel"></span>
+          <div class="month-nav">
+            <button id="calPrev" aria-label="上月">◀</button>
+            <button id="calNext" aria-label="下月">▶</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calGrid"></div>
+        <div class="calendar-sticker-bar" id="stickerBar"></div>
+        <div style="text-align:center;margin-top:8px">
+          <button class="btn-small" id="addStickerNoteBtn">+ 给贴纸加评价 → 同步到信箱</button>
+        </div>
+      </div>
+
+      <!-- 共创日历 -->
+      <div id="sharedCalendarPanel" style="display:none">
+        <div class="shared-calendar-list" id="sharedCalendarList"></div>
+        <div style="text-align:center;margin-bottom:12px">
+          <button class="btn-small" id="createSharedCalBtn">+ 新建共创日历</button>
+        </div>
+        <div id="sharedCalDetail" style="display:none">
+          <div class="calendar-header">
+            <span class="month-label" id="sharedCalMonthLabel"></span>
+            <div class="month-nav">
+              <button id="sharedCalPrev" aria-label="上月">◀</button>
+              <button id="sharedCalNext" aria-label="下月">▶</button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="sharedCalGrid"></div>
+          <div class="calendar-sticker-bar" id="sharedStickerBar"></div>
+          <div class="shared-members-row" id="sharedMembersRow" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== PAGE 3: 今日任务 ====== -->
+    <section id="page-tasks" class="page">
+      <div class="progress-bar-title" id="goalTitle">长期规划：三个月内完成项目答辩</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <span class="progress-bar-label" id="progressLabel">0%</span>
+      </div>
+
+      <div class="task-section" id="morningSection">
+        <div class="section-title">☀️ 上午</div>
+        <div id="morningTasks"></div>
+        <button class="btn-small" id="addMorningBtn" style="margin-top:6px">+ 添加任务</button>
+      </div>
+
+      <div class="task-section" id="afternoonSection">
+        <div class="section-title">🌤️ 下午</div>
+        <div id="afternoonTasks"></div>
+        <button class="btn-small" id="addAfternoonBtn" style="margin-top:6px">+ 添加任务</button>
+      </div>
+
+      <div class="quadrant-toggle">
+        <button class="btn-small" id="quadrantToggleBtn">展开象限 ▼</button>
+      </div>
+      <div class="quadrant-grid" id="quadrantGrid">
+        <div class="quadrant-cell q-urgent-important">
+          <div class="q-label">🔥 重要紧急</div>
+          <div id="qUI"></div>
+        </div>
+        <div class="quadrant-cell q-important-not-urgent">
+          <div class="q-label">📚 重要不紧急</div>
+          <div id="qINU"></div>
+        </div>
+        <div class="quadrant-cell q-urgent-not-important">
+          <div class="q-label">⚡ 紧急不重要</div>
+          <div id="qUNI"></div>
+        </div>
+        <div class="quadrant-cell q-not-urgent-not-important">
+          <div class="q-label">🧘 不紧急不重要</div>
+          <div id="qNUNI"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== PAGE 4: 牢骚信箱 ====== -->
+    <section id="page-mailbox" class="page">
+      <div class="mailbox-visual">
+        <svg class="mailbox-svg" viewBox="0 0 120 140" fill="none">
+          <!-- 信箱柱子 -->
+          <rect x="52" y="90" width="16" height="50" rx="3" fill="#9a8876"/>
+          <!-- 信箱主体 -->
+          <rect x="20" y="40" width="80" height="55" rx="8" fill="#c4b39b" stroke="#9a8876" stroke-width="1"/>
+          <!-- 信箱顶部 -->
+          <path d="M20 48 Q60 20 100 48" fill="#9a8876" stroke="#7a6a58" stroke-width="1"/>
+          <!-- 投递口 -->
+          <rect x="40" y="58" width="40" height="8" rx="4" fill="#5a4a3a" stroke="#8a7868" stroke-width="1"/>
+          <!-- 信箱标志 -->
+          <text x="60" y="80" text-anchor="middle" fill="#6a5a48" font-family="Courier New" font-size="8" letter-spacing="2">POST</text>
+          <!-- 小旗子 -->
+          <rect x="88" y="30" width="4" height="20" fill="#9a8876"/>
+          <polygon points="92,30 92,44 104,37" fill="#c8853d"/>
+        </svg>
+      </div>
+      <div class="complaint-input-area">
+        <textarea class="input-dark" id="complaintInput" placeholder="写一句牢骚……"></textarea>
+        <div class="complaint-meta">
+          <div class="emotion-selector" id="emotionSelector">
+            <button class="emo-btn" data-emo="😤">😤</button>
+            <button class="emo-btn" data-emo="😭">😭</button>
+            <button class="emo-btn" data-emo="🙄">🙄</button>
+            <button class="emo-btn" data-emo="🤯">🤯</button>
+            <button class="emo-btn" data-emo="😢">😢</button>
+          </div>
+          <button class="btn-primary" id="complaintSubmitBtn" style="padding:6px 16px;font-size:11px">投递 📮</button>
+        </div>
+      </div>
+      <div class="complaint-list" id="complaintList"></div>
+      <div class="emotion-stats" id="emotionStats">
+        <div class="stats-title">📊 本周情绪统计</div>
+      </div>
+    </section>
+
+    <!-- ====== PAGE 5: 回顾 ====== -->
+    <section id="page-review" class="page">
+      <div class="review-toggle">
+        <button class="btn-small review-period active" data-period="week">本周</button>
+        <button class="btn-small review-period" data-period="month">本月</button>
+      </div>
+
+      <div class="review-section">
+        <div class="review-title">☕ 贴纸云图</div>
+        <div class="sticker-cloud" id="stickerCloud"></div>
+      </div>
+
+      <div class="review-section">
+        <div class="review-title">📊 任务象限</div>
+        <div class="quadrant-pie" id="quadrantPie">
+          <div class="pie-center">任务</div>
+        </div>
+      </div>
+
+      <div class="review-section">
+        <div class="review-title">📮 漂流轨迹</div>
+        <div class="drift-trace" id="driftTrace"></div>
+      </div>
+
+      <div class="review-section">
+        <div class="encourage-text" id="encourageText"></div>
+      </div>
+    </section>
+
+    <!-- ====== PAGE 6: 朋友/朋友圈/账户 ====== -->
+    <section id="page-friends" class="page">
+      <div class="social-tabs">
+        <button class="social-tab active" data-tab="feed">动态</button>
+        <button class="social-tab" data-tab="friends">好友</button>
+        <button class="social-tab" data-tab="me">我的</button>
+      </div>
+
+      <!-- 动态 Feed -->
+      <div class="social-panel active" id="panel-feed">
+        <div class="feed-composer card-surface">
+          <div class="feed-composer-header">
+            <div class="avatar-small" id="composerAvatar">🙂</div>
+            <span class="composer-name" id="composerName">我</span>
+          </div>
+          <div class="feed-photo-upload" id="feedPhotoUpload">
+            <div class="feed-upload-hint">
+              <span>📸 分享今日</span>
+              <small>照片会自动变成卡通贴纸 ✨</small>
+            </div>
+            <input type="file" id="feedPhotoInput" accept="image/*" hidden>
+          </div>
+          <div id="feedStickerPreview" class="feed-sticker-preview" style="display:none"></div>
+          <textarea class="input-dark" id="feedCaption" placeholder="写点什么……（比如：今天喝了榛果拿铁）"></textarea>
+          <div class="feed-composer-actions">
+            <button class="btn-small" id="feedPostBtn">发布到动态 🌟</button>
+          </div>
+        </div>
+        <div id="feedList" class="feed-list"></div>
+      </div>
+
+      <!-- 好友 -->
+      <div class="social-panel" id="panel-friends">
+        <div class="friend-search card-surface">
+          <div class="form-title">🔍 搜索朋友 ID</div>
+          <div class="friend-search-row">
+            <input class="input-dark" id="friendSearchInput" placeholder="例如 @momo 或 momo">
+            <button class="btn-primary" id="friendSearchBtn">添加</button>
+          </div>
+          <div class="friend-hint">输入朋友的 ID 搜索添加</div>
+        </div>
+        <div class="friend-list-title">👥 我的好友</div>
+        <div id="friendList" class="friend-list"></div>
+      </div>
+
+      <!-- 我的 -->
+      <div class="social-panel" id="panel-me">
+        <div class="profile-card card-surface">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">🙂</div>
+            <div class="profile-info">
+              <input class="input-dark profile-name" id="profileNameInput" value="旅行者">
+              <div class="profile-handle" id="profileHandle">@user_001</div>
+              <textarea class="input-dark profile-bio" id="profileBioInput" placeholder="写一句个性签名……"></textarea>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn-small" id="saveProfileBtn">保存资料</button>
+            <button class="btn-outline" id="viewQrBtn" style="padding:6px 12px;font-size:11px">二维码名片</button>
+          </div>
+        </div>
+
+        <div class="qr-card card-surface" id="qrCard" style="display:none">
+          <div class="qr-title">📇 扫一扫加我</div>
+          <canvas id="qrCanvas" width="160" height="160"></canvas>
+          <div class="qr-handle" id="qrHandle">@user_001</div>
+        </div>
+
+        <div class="me-stats card-surface">
+          <div class="stat-item">
+            <span class="stat-num" id="mePostCount">0</span>
+            <span class="stat-label">动态</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="meFriendCount">0</span>
+            <span class="stat-label">好友</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="meCardCount">0</span>
+            <span class="stat-label">明信片</span>
+          </div>
+        </div>
+
+        <button class="btn-outline" id="goReviewBtn" style="width:100%;margin-top:16px">📖 查看每周回顾</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 底部标签栏 -->
+  <nav id="tab-bar">
+    <button class="tab-item active" data-page="page-postcard" aria-label="明信片">
+      <span class="tab-icon">📮</span>
+      <span>明信片</span>
+    </button>
+    <button class="tab-item" data-page="page-calendar" aria-label="日历">
+      <span class="tab-icon">📅</span>
+      <span>日历</span>
+    </button>
+    <button class="tab-item" data-page="page-friends" aria-label="朋友">
+      <span class="tab-icon">🫂</span>
+      <span>朋友</span>
+    </button>
+    <button class="tab-item" data-page="page-tasks" aria-label="任务">
+      <span class="tab-icon">✅</span>
+      <span>任务</span>
+    </button>
+    <button class="tab-item" data-page="page-mailbox" aria-label="信箱">
+      <span class="tab-icon">📪</span>
+      <span>信箱</span>
+    </button>
+  </nav>
+
+  <!-- 明信片详情Overlay -->
+  <div id="postcard-overlay">
+    <div class="overlay-card" id="overlayCard">
+      <button class="overlay-close" id="overlayCloseBtn">✕</button>
+      <div class="overlay-flip-area">
+        <div class="flip-card" id="overlayFlipCard">
+          <div class="flip-card-inner" id="overlayFlipInner">
+            <div class="flip-card-front" id="overlayFront"></div>
+            <div class="flip-card-back" id="overlayBack"></div>
+          </div>
+        </div>
+      </div>
+      <div class="overlay-actions" id="overlayActions">
+        <button class="btn-small" id="overlayFlipBtn">🔄 翻转</button>
+        <button class="btn-small" id="overlayFutureBtn">写给未来 📅</button>
+        <button class="btn-small" id="overlayDriftBtn">漂流给朋友 ✈️</button>
+        <button class="btn-small" id="overlayDeleteBtn" style="color:var(--stamp-error)">删除 🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- "写给未来"弹窗 -->
+  <div class="modal-overlay" id="futureModal">
+    <div class="modal-box">
+      <div class="modal-title">📅 写给未来自己</div>
+      <div class="modal-options" id="futureOptions">
+        <div class="modal-option" data-years="1">1年后</div>
+        <div class="modal-option" data-years="3">3年后</div>
+        <div class="modal-option" data-years="5">5年后</div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn-primary" id="futureConfirmBtn">确认寄出 ✉️</button>
+        <button class="btn-outline" id="futureCancelBtn" style="margin-left:8px">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- "漂流给朋友"弹窗 -->
+  <div class="modal-overlay" id="driftModal">
+    <div class="modal-box">
+      <div class="modal-title">✈️ 漂流给朋友</div>
+      <input class="input-dark modal-input" id="driftFriendId" placeholder="输入朋友的ID或名称">
+      <div class="modal-title" style="font-size:12px;margin-top:12px">选择航线</div>
+      <div class="modal-options" id="driftRoutes"></div>
+      <div style="text-align:center;margin-top:12px">
+        <button class="btn-primary" id="driftConfirmBtn">开始漂流 ✈️</button>
+        <button class="btn-outline" id="driftCancelBtn" style="margin-left:8px">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 鼓励弹窗 -->
+  <div class="toast-encourage" id="toastEncourage"></div>
+</div>
+
+<script>
+// ==========================================
+// Supabase 配置 ← 把下面的 URL 和 KEY 换成你自己的
+// ==========================================
+const SUPABASE_URL = 'https://cnutbbpzrkhwvpoivbhb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNudXRiYnB6cmtod3Zwb2l2YmhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NTYzMzIsImV4cCI6MjEwMTAzMjMzMn0.BmbBf67qQkqqIQ5OxydhTKWhd5F6qS3EcAqbDacgyOs';
+// 保存 Supabase 库的引用（CDN 脚本会把库挂到全局 supabase 上）
+var _sbLib = (typeof supabase !== 'undefined') ? supabase : (window.supabase || null);
+// supabase 变量由 CDN 脚本声明，我们直接复用它来存储 client 实例
+
+// ==========================================
+// AuthModule - 登录/注册/会话管理
+// ==========================================
+const AuthModule = {
+  mode: 'login',
+  currentUser: null,
+  currentProfile: null,
+
+  switchMode(mode) {
+    this.mode = mode;
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+    document.getElementById('registerFields').style.display = mode === 'register' ? 'block' : 'none';
+    document.getElementById('authSubmitBtn').textContent = mode === 'login' ? '✉️ 登录' : '✉️ 注册';
+    document.getElementById('authError').textContent = '';
+  },
+
+  async submit() {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errEl = document.getElementById('authError');
+    const btn = document.getElementById('authSubmitBtn');
+    errEl.textContent = '';
+    btn.disabled = true; btn.textContent = '处理中...';
+
+    if (!email || !password) { errEl.textContent = '请填写邮箱和密码'; btn.disabled = false; btn.textContent = this.mode === 'login' ? '✉️ 登录' : '✉️ 注册'; return; }
+    if (password.length < 6) { errEl.textContent = '密码至少6位'; btn.disabled = false; btn.textContent = this.mode === 'login' ? '✉️ 登录' : '✉️ 注册'; return; }
+
+    if (!supabase) { errEl.textContent = '请先配置 Supabase（见说明）'; btn.disabled = false; btn.textContent = this.mode === 'login' ? '✉️ 登录' : '✉️ 注册'; return; }
+
+    try {
+      if (this.mode === 'register') {
+        const handle = document.getElementById('authHandle').value.trim().replace(/^@/, '');
+        const name = document.getElementById('authName').value.trim() || '旅行者';
+        if (!handle || !/^[a-zA-Z0-9_]+$/.test(handle)) { errEl.textContent = 'ID只能用字母数字下划线'; btn.disabled = false; btn.textContent = '✉️ 注册'; return; }
+
+        // 检查 handle 是否已被占用
+        const { data: existing } = await supabase.from('profiles').select('id').eq('handle', handle).maybeSingle();
+        if (existing) { errEl.textContent = '这个 ID 已被使用，换一个吧'; btn.disabled = false; btn.textContent = '✉️ 注册'; return; }
+
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name, handle } } });
+        if (error) throw error;
+
+        // 更新 profile（用 upsert，表不存在也不崩溃）
+        if (data.user) {
+          try {
+            await supabase.from('profiles').upsert({ id: data.user.id, handle, name, avatar: '🙂' });
+          } catch(e) { console.warn('Profile upsert failed (table may not exist):', e); }
+        }
+
+        if (data.session) {
+          // 已自动登录，onAuthStateChange 会自动触发
+          errEl.style.color = 'var(--stamp-green)';
+          errEl.textContent = '注册成功！正在进入...';
+        } else {
+          // Supabase 开启了邮箱验证 → 需要用户去邮箱点确认链接
+          errEl.style.color = '#c8853d';
+          errEl.innerHTML = '✅ 注册成功！请去邮箱点击确认链接，然后回来登录。<br><small>提示：如果不想邮箱验证，可在 Supabase 后台 Authentication → Settings 关闭 "Confirm email"</small>';
+          btn.disabled = false;
+          btn.textContent = '✉️ 注册';
+        }
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+    } catch(e) {
+      errEl.textContent = e.message || '操作失败';
+      btn.disabled = false;
+      btn.textContent = this.mode === 'login' ? '✉️ 登录' : '✉️ 注册';
+    }
+  },
+
+  async onAuthStateChange(session) {
+    if (session && session.user) {
+      this.currentUser = session.user;
+      // 加载 profile
+      try {
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+        this.currentProfile = profile || { handle: 'user_' + session.user.id.slice(0, 6), name: '旅行者', avatar: '🙂' };
+      } catch(e) {
+        console.error('Profile load error:', e);
+        this.currentProfile = { handle: 'user_' + session.user.id.slice(0, 6), name: '旅行者', avatar: '🙂' };
+      }
+      // 隐藏登录页
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('loadingOverlay').style.display = 'flex';
+      // 初始化应用（10秒超时保护）
+      try {
+        await Promise.race([
+          App.init(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('App.init timeout')), 10000))
+        ]);
+      } catch(e) {
+        console.error('App.init error:', e);
+      } finally {
+        // 无论成功失败都关闭加载遮罩
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }
+      // 更新 header 用户信息
+      this.updateHeader();
+    } else {
+      this.currentUser = null;
+      this.currentProfile = null;
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('app').style.opacity = '0.3';
+    }
+  },
+
+  updateHeader() {
+    if (!this.currentProfile) return;
+    const header = document.querySelector('.app-header');
+    const existing = header.querySelector('.user-badge');
+    if (existing) existing.remove();
+    const badge = document.createElement('div');
+    badge.className = 'user-badge';
+    badge.innerHTML = `<div class="user-avatar">${this.currentProfile.avatar || '🙂'}</div>
+      <button class="logout-btn" onclick="AuthModule.logout()">退出</button>`;
+    header.querySelector('.settings-btn').before(badge);
+  },
+
+  async logout() {
+    if (!confirm('确定退出登录？')) return;
+    await supabase.auth.signOut();
+    location.reload();
+  }
+};
+
+// ==========================================
+// AppCore - 全局状态管理、路由、存储
+// ==========================================
+const Store = {
+  keys: {
+    postcards: 'drift_postcards',
+    calendar: 'drift_calendar',
+    tasks: 'drift_tasks',
+    complaints: 'drift_complaints',
+    settings: 'drift_settings',
+    profile: 'drift_profile',
+    friends: 'drift_friends',
+    feed: 'drift_feed',
+    sharedCalendars: 'drift_shared_calendars'
+  },
+  _cache: {},
+  load(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || null; }
+    catch(e) { return null; }
+  },
+  save(key, data) {
+    try { localStorage.setItem(key, JSON.stringify(data)); }
+    catch(e) { console.warn('Storage write failed', e); }
+  },
+  loadArr(key) {
+    const v = this.load(key);
+    return Array.isArray(v) ? v : [];
+  },
+  loadObj(key, defaults) {
+    const v = this.load(key);
+    return v && typeof v === 'object' && !Array.isArray(v) ? v : defaults;
+  },
+  getPostcards() { return this.loadArr(this.keys.postcards); },
+  savePostcards(d) { this.save(this.keys.postcards, d); },
+  getCalendar() { return this.loadArr(this.keys.calendar); },
+  saveCalendar(d) { this.save(this.keys.calendar, d); },
+  getTasks() { return this.loadArr(this.keys.tasks); },
+  saveTasks(d) { this.save(this.keys.tasks, d); },
+  getComplaints() { return this.loadArr(this.keys.complaints); },
+  saveComplaints(d) { this.save(this.keys.complaints, d); },
+  getProfile() {
+    if (AuthModule.currentProfile) return AuthModule.currentProfile;
+    return this.loadObj(this.keys.profile, null);
+  },
+  saveProfile(d) {
+    this.save(this.keys.profile, d);
+    if (supabase && AuthModule.currentUser) {
+      supabase.from('profiles').update({
+        name: d.name, bio: d.bio, avatar: d.avatar
+      }).eq('id', AuthModule.currentUser.id).then();
+    }
+  },
+  // friends 和 feed 改为云端操作，本地不再存储
+  async getFriends() {
+    if (!supabase || !AuthModule.currentUser) return [];
+    const uid = AuthModule.currentUser.id;
+    const { data } = await supabase.from('friendships')
+      .select('friend_id, profiles!friendships_friend_id_fkey(handle, name, avatar, bio)')
+      .eq('user_id', uid).eq('status', 'accepted');
+    const { data: data2 } = await supabase.from('friendships')
+      .select('user_id, profiles!friendships_user_id_fkey(handle, name, avatar, bio)')
+      .eq('friend_id', uid).eq('status', 'accepted');
+    const friends = [
+      ...(data || []).map(r => ({ id: r.friend_id, ...r.profiles })),
+      ...(data2 || []).map(r => ({ id: r.user_id, ...r.profiles }))
+    ];
+    return friends;
+  },
+  async getFeed() {
+    if (!supabase || !AuthModule.currentUser) return [];
+    const uid = AuthModule.currentUser.id;
+    // 获取好友ID列表
+    const { data: f1, error: e1 } = await supabase.from('friendships').select('friend_id').eq('user_id', uid).eq('status', 'accepted');
+    const { data: f2, error: e2 } = await supabase.from('friendships').select('user_id').eq('friend_id', uid).eq('status', 'accepted');
+    if (e1) console.warn('getFeed friendships query1 error:', e1);
+    if (e2) console.warn('getFeed friendships query2 error:', e2);
+    const friendIds = [...(f1||[]).map(r=>r.friend_id), ...(f2||[]).map(r=>r.user_id), uid];
+    const { data, error } = await supabase.from('feed_posts')
+      .select('*').in('author_id', friendIds)
+      .order('created_at', { ascending: false }).limit(50);
+    if (error) console.warn('getFeed feed_posts query error:', error);
+    // 获取我点赞的帖子
+    const { data: myLikes } = await supabase.from('feed_likes').select('post_id').eq('user_id', uid);
+    const likedSet = new Set((myLikes||[]).map(l => l.post_id));
+    return (data || []).map(p => ({
+      id: p.id,
+      authorHandle: '', authorName: p.author_name, authorAvatar: p.author_avatar,
+      authorId: p.author_id,
+      sticker: p.sticker, caption: p.caption,
+      time: new Date(p.created_at).getTime(),
+      likes: p.likes, likedByMe: likedSet.has(p.id)
+    }));
+  },
+  getSharedCalendars() { return this.loadArr(this.keys.sharedCalendars); },
+  saveSharedCalendars(d) { this.save(this.keys.sharedCalendars, d); }
+};
+
+// 路由切换
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const page = document.getElementById(pageId);
+  if (page) page.classList.add('active');
+  const tab = document.querySelector(`.tab-item[data-page="${pageId}"]`);
+  if (tab) tab.classList.add('active');
+  // 刷新对应模块
+  if (pageId === 'page-postcard') PostcardModule.render();
+  if (pageId === 'page-calendar') CalendarModule.render();
+  if (pageId === 'page-friends') SocialModule.render();
+  if (pageId === 'page-tasks') TaskModule.render();
+  if (pageId === 'page-mailbox') MailboxModule.render();
+}
+
+document.querySelectorAll('.tab-item').forEach(tab => {
+  tab.addEventListener('click', () => switchPage(tab.dataset.page));
+});
+
+// 通知权限
+function requestNotify() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+}
+function checkNotifications() {
+  const now = Date.now();
+  const cards = Store.getPostcards();
+  const toRemind = cards.filter(c => c.dueTime <= now && !c.reminded);
+  if (toRemind.length) {
+    let msg = `📬 ${toRemind.length}张明信片已到达！\n`;
+    toRemind.forEach(c => msg += `· 来自${c.city}\n`);
+    if (Notification.permission === 'granted') new Notification('漂流本提醒', { body: msg });
+    toRemind.forEach(c => c.reminded = true);
+    Store.savePostcards(cards);
+    PostcardModule.render();
+  }
+}
+
+// 鼓励弹窗
+function showEncourage(text) {
+  const el = document.getElementById('toastEncourage');
+  el.textContent = text;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// 工具函数
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]);
+}
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+// 压缩图片：缩放到 maxSize 以内，JPEG 质量 0.82
+function compressImage(file, maxSize = 1280) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          const ratio = Math.min(maxSize / width, maxSize / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// 大洲颜色映射
+function continentColor(city) {
+  const asianCities = ['东京','北京','上海','拉萨','首尔','曼谷','新加坡','香港','台北','大阪','京都','河内','雅加达','马尼拉','德里','孟买'];
+  const euroCities = ['巴黎','伦敦','罗马','柏林','巴塞罗那','阿姆斯特丹','布拉格','维也纳','里斯本','雅典','莫斯科','圣彼得堡','佛罗伦萨','威尼斯','马德里'];
+  const amerCities = ['纽约','洛杉矶','旧金山','芝加哥','波士顿','华盛顿','多伦多','温哥华','墨西哥城','里约','布宜诺斯艾利斯','利马','圣地亚哥','哈瓦那'];
+  const africanCities = ['开罗','马拉喀什','内罗毕','开普敦','拉各斯','亚的斯亚贝巴','达喀尔'];
+  const oceanCities = ['悉尼','墨尔本','奥克兰','斐济'];
+  if (asianCities.includes(city)) return 'stamp-red';
+  if (euroCities.includes(city)) return 'stamp-gold';
+  if (amerCities.includes(city)) return 'stamp-blue';
+  if (africanCities.includes(city)) return 'stamp-green';
+  if (oceanCities.includes(city)) return 'stamp-green';
+  return 'stamp-gold';
+}
+function cityEmoji(city) {
+  const map = {'拉萨':'🏔️','北京':'🏯','上海':'🌃','东京':'🗼','巴黎':'🗼','伦敦':'🎭','罗马':'🏛️','纽约':'🗽','悉尼':'🏖️','曼谷':'🛕','首尔':'🇰🇷','柏林':'🦅','巴塞罗那':'⚽','开罗':'🏛️'};
+  return map[city] || '📍';
+}
+
+// 漂流航线数据
+const driftRoutes = [
+  { id: 'asia-euro', name: '亚洲→欧洲', cities: ['东京','曼谷','德里','罗马','巴黎','伦敦'], emoji: ['🗼','🛕','🇮🇳','🏛️','🗼','🎭'] },
+  { id: 'euro-amer', name: '欧洲→美洲', cities: ['巴黎','伦敦','纽约','洛杉矶','温哥华'], emoji: ['🗼','🎭','🗽','🌴','🍁'] },
+  { id: 'global', name: '环球漂流', cities: ['东京','巴黎','纽约','悉尼','伦敦','回到你'], emoji: ['🗼','🗼','🗽','🏖️','🎭','🏠'] }
+];
+
+// ==========================================
+// PostcardModule - 明信片创建与展示
+// ==========================================
+const PostcardModule = {
+  currentOverlayIdx: -1,
+
+  init() {
+    // 照片上传
+    const uploadArea = document.getElementById('photoUpload');
+    const photoInput = document.getElementById('photoInput');
+    uploadArea.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        uploadArea.classList.add('has-image');
+        document.getElementById('uploadHint').style.display = 'none';
+        let img = uploadArea.querySelector('img');
+        if (!img) { img = document.createElement('img'); uploadArea.appendChild(img); }
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 创建按钮
+    document.getElementById('createBtn').addEventListener('click', () => this.createPostcard());
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (!confirm('永久删除所有明信片？')) return;
+      Store.savePostcards([]);
+      this.render();
+    });
+
+    // Overlay 关闭
+    document.getElementById('overlayCloseBtn').addEventListener('click', () => this.closeOverlay());
+    document.getElementById('postcard-overlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('postcard-overlay')) this.closeOverlay();
+    });
+
+    // 弹窗按钮（写给未来 / 漂流给朋友 - 这些按钮在 HTML 中已存在）
+    const futureConfirmBtn = document.getElementById('futureConfirmBtn');
+    if (futureConfirmBtn) futureConfirmBtn.addEventListener('click', () => this.confirmFuture());
+    const futureCancelBtn = document.getElementById('futureCancelBtn');
+    if (futureCancelBtn) futureCancelBtn.addEventListener('click', () => {
+      document.getElementById('futureModal').classList.remove('show');
+    });
+    const driftConfirmBtn = document.getElementById('driftConfirmBtn');
+    if (driftConfirmBtn) driftConfirmBtn.addEventListener('click', () => this.confirmDrift());
+    const driftCancelBtn = document.getElementById('driftCancelBtn');
+    if (driftCancelBtn) driftCancelBtn.addEventListener('click', () => {
+      document.getElementById('driftModal').classList.remove('show');
+    });
+    // 注意：overlayFlipBtn / overlayFutureBtn / overlayDriftBtn / overlayDeleteBtn
+    // 是在 openOverlay() 中动态生成的，已带 inline onclick，不需要在此绑定
+
+    this.render();
+  },
+
+  async createPostcard() {
+    const msg = document.getElementById('cardMessage').value.trim();
+    const city = document.getElementById('cardCity').value.trim();
+    const days = parseInt(document.getElementById('cardDays').value, 10);
+    if (!msg) { showEncourage('请写下你的留言～'); return; }
+    if (!city) { showEncourage('请填写地点～'); return; }
+    if (isNaN(days) || days < 0) { showEncourage('天数需≥0'); return; }
+
+    let imageBase64 = null;
+    const photoInput = document.getElementById('photoInput');
+    if (photoInput.files[0]) {
+      if (photoInput.files[0].size > 10*1024*1024) { showEncourage('图片不超过10MB'); return; }
+      try { imageBase64 = await compressImage(photoInput.files[0], 1280); } catch(e) { imageBase64 = null; }
+    }
+
+    const now = Date.now();
+    const card = {
+      id: now.toString() + Math.random().toString(36).slice(2),
+      message: msg, city: city, days: days,
+      createTime: now, dueTime: now + days*24*60*60*1000,
+      reminded: false, imageBase64: imageBase64,
+      driftRoute: null, driftProgress: 0,
+      futureYears: null
+    };
+    const cards = Store.getPostcards();
+    cards.push(card);
+    Store.savePostcards(cards);
+
+    // 清空表单
+    document.getElementById('cardMessage').value = '';
+    document.getElementById('cardCity').value = '';
+    document.getElementById('cardDays').value = '30';
+    document.getElementById('photoInput').value = '';
+    const uploadArea = document.getElementById('photoUpload');
+    uploadArea.classList.remove('has-image');
+    const hint = document.getElementById('uploadHint');
+    hint.style.display = '';
+    const img = uploadArea.querySelector('img');
+    if (img) img.remove();
+
+    showEncourage(`📮 明信片已寄往${city}！${days>0?days+'天后到达':'已到达'}`);
+    this.render();
+    checkNotifications();
+  },
+
+  render() {
+    const cards = Store.getPostcards();
+    const grid = document.getElementById('postcardGrid');
+    const stampList = document.getElementById('stampList');
+    const empty = document.getElementById('emptyPostcards');
+    const now = Date.now();
+
+    if (!cards.length) {
+      grid.innerHTML = '';
+      stampList.innerHTML = '';
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    // 邮票标记
+    stampList.innerHTML = cards.map((c, i) => {
+      const colorCls = continentColor(c.city);
+      const isDelivered = c.dueTime <= now;
+      const statusText = isDelivered ? (c.reminded ? '✅' : '📮') : '🚆';
+      const driftTag = c.driftRoute ? ' 🔗' : '';
+      const collabCls = c.collab ? ' collab' : '';
+      const daysLeft = !isDelivered ? ` · ${Math.floor((c.dueTime-now)/(24*60*60*1000))}天` : '';
+      return `<div class="stamp-marker ${colorCls}${collabCls}" data-idx="${i}" onclick="PostcardModule.openOverlay(${i})">
+        <span class="stamp-emoji">${cityEmoji(c.city)}</span>
+        <span class="stamp-city">${escHtml(c.city)}</span>
+        <span class="stamp-date">${statusText}${driftTag}${daysLeft}</span>
+      </div>`;
+    }).join('');
+
+    // 明信片缩略列表
+    grid.innerHTML = cards.map((c, i) => {
+      const isDelivered = c.dueTime <= now;
+      const statusCls = isDelivered ? 'delivered' : 'waiting';
+      const statusText = isDelivered ? (c.reminded ? '✅ 已提醒' : '📮 已到期') : '🚆 旅行中';
+      const daysLeft = isDelivered ? '' : `剩余${Math.floor((c.dueTime-now)/(24*60*60*1000))}天`;
+      let frontImg = c.imageBase64
+        ? `<img src="${c.imageBase64}" alt="明信片照片" style="width:100%;height:140px;object-fit:cover;border-radius:12px 16px 8px 14px;" onerror="this.style.display='none'">`
+        : `<div style="width:100%;height:140px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-family:var(--font-doodle);border-radius:12px 16px 8px 14px;">📷 未上传</div>`;
+
+      return `<div class="postcard-item card-surface" onclick="PostcardModule.openOverlay(${i})">
+        ${frontImg}
+        <div style="padding:10px 0 0;display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;gap:6px;align-items:center;font-size:11px">
+            <span class="tag">${cityEmoji(c.city)} ${escHtml(c.city)}</span>
+            <span class="tag ${statusCls}" style="font-weight:700">${statusText}</span>
+            ${daysLeft ? `<span style="font-size:10px;color:var(--text-muted)">${daysLeft}</span>` : ''}
+          </div>
+          <button class="btn-small" style="font-size:10px">查看 →</button>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  openOverlay(idx) {
+    const cards = Store.getPostcards();
+    if (idx < 0 || idx >= cards.length) return;
+    this.currentOverlayIdx = idx;
+    const card = cards[idx];
+    const now = Date.now();
+
+    // 正面
+    const front = document.getElementById('overlayFront');
+    const dateStr = new Date(card.createTime).toLocaleDateString('zh-CN', {month:'short', day:'numeric'});
+    if (card.imageBase64) {
+      front.innerHTML = `<div class="photo-frame">
+        <img src="${card.imageBase64}" alt="明信片照片" onerror="this.parentElement.innerHTML='<div class=no-photo>📷</div>'">
+        <div class="postmark-overlay">
+          <div class="pm-city">${escHtml(card.city)}</div>
+          <div class="pm-emoji">${cityEmoji(card.city)}</div>
+        </div>
+        <div class="doodle-deco">✈️ ${escHtml(card.city)}</div>
+        <div class="doodle-date">${dateStr}</div>
+        <div class="mini-seal">漂流本</div>
+      </div>`;
+    } else {
+      front.innerHTML = `<div class="photo-frame">
+        <div class="no-photo" style="font-size:16px">📷 留白<br><span style="font-size:12px;font-family:var(--font-doodle)">${escHtml(card.city)}</span></div>
+        <div class="postmark-overlay">
+          <div class="pm-city">${escHtml(card.city)}</div>
+          <div class="pm-emoji">${cityEmoji(card.city)}</div>
+        </div>
+        <div class="doodle-deco">✈️ ${escHtml(card.city)}</div>
+        <div class="doodle-date">${dateStr}</div>
+        <div class="mini-seal">漂流本</div>
+      </div>`;
+    }
+
+    // 背面
+    const back = document.getElementById('overlayBack');
+    const pcCells = Array(6).fill('<div class="pc-cell"></div>').join('');
+    back.innerHTML = `
+      <div class="back-header">
+        <div class="postcode-box">${pcCells}</div>
+        <div class="back-stamp">✉️</div>
+      </div>
+      <div class="letter-area">
+        <div class="letter-text">${escHtml(card.message)}</div>
+        <div class="back-postmark">
+          <div class="pm-city">${escHtml(card.city)}</div>
+          <div class="pm-icon">${cityEmoji(card.city)}</div>
+        </div>
+      </div>
+      <div class="back-footer">
+        <span>CHINA POST 中国邮政</span>
+        <span>邮编 850000</span>
+      </div>`;
+
+    // 确保翻转状态重置
+    document.getElementById('overlayFlipCard').classList.remove('flipped');
+
+    // 漂流进度（如果有）
+    const actionsEl = document.getElementById('overlayActions');
+    let driftHtml = '';
+    if (card.driftRoute) {
+      const route = driftRoutes.find(r => r.id === card.driftRoute);
+      if (route) {
+        const visitedCount = card.driftProgress || 0;
+        driftHtml = `<div class="drift-progress" style="margin-top:8px">
+          <div class="drift-route">
+            ${route.cities.map((city, ci) => {
+              let cls = ci < visitedCount ? 'visited' : ci === visitedCount ? 'current' : '';
+              return `<span class="drift-city ${cls}">${route.emoji[ci]} ${city}</span>${ci < route.cities.length-1 ? '<span class="drift-arrow">→</span>' : ''}`;
+            }).join('')}
+          </div>
+        </div>`;
+      }
+    }
+    actionsEl.innerHTML = `
+      <button class="btn-small" id="overlayFlipBtn" onclick="document.getElementById('overlayFlipCard').classList.toggle('flipped')">🔄 翻转</button>
+      <button class="btn-small" id="overlayEditBtn" onclick="PostcardModule.editCurrent()">✏️ 编辑</button>
+      <button class="btn-small" id="overlayFutureBtn" onclick="PostcardModule.showFutureModal()">写给未来 📅</button>
+      <button class="btn-small" id="overlayDriftBtn" onclick="PostcardModule.showDriftModal()">漂流给朋友 ✈️</button>
+      <button class="btn-small" style="color:var(--stamp-error)" onclick="PostcardModule.deleteCurrent()">删除 🗑️</button>
+      ${driftHtml}`;
+
+    document.getElementById('postcard-overlay').classList.add('show');
+  },
+
+  closeOverlay() {
+    document.getElementById('postcard-overlay').classList.remove('show');
+    this.currentOverlayIdx = -1;
+  },
+
+  deleteCurrent() {
+    if (this.currentOverlayIdx < 0) return;
+    if (!confirm('删除这张明信片？')) return;
+    const cards = Store.getPostcards();
+    cards.splice(this.currentOverlayIdx, 1);
+    Store.savePostcards(cards);
+    this.closeOverlay();
+    this.render();
+  },
+
+  editCurrent() {
+    if (this.currentOverlayIdx < 0) return;
+    const cards = Store.getPostcards();
+    const card = cards[this.currentOverlayIdx];
+    if (!card) return;
+
+    // 关闭 overlay，弹出编辑表单
+    this.closeOverlay();
+
+    const msg = prompt('编辑留言：', card.message || '');
+    if (msg === null) return;
+    const city = prompt('编辑地点：', card.city || '');
+    if (city === null) return;
+    const daysStr = prompt('多少天后提醒？（0=立刻）', String(card.days || 0));
+    if (daysStr === null) return;
+    const days = parseInt(daysStr, 10);
+
+    card.message = msg.trim();
+    card.city = city.trim();
+    card.days = isNaN(days) ? 0 : days;
+    card.dueTime = card.createTime + card.days * 24 * 60 * 60 * 1000;
+
+    // 是否更换照片
+    const changePhoto = confirm('要更换照片吗？');
+    if (changePhoto) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 10*1024*1024) { showEncourage('图片不超过10MB'); return; }
+          try { card.imageBase64 = await compressImage(file, 1280); } catch(err) {}
+        }
+        Store.savePostcards(cards);
+        this.render();
+        showEncourage('明信片已更新 ✨');
+      };
+      input.click();
+    } else {
+      Store.savePostcards(cards);
+      this.render();
+      showEncourage('明信片已更新 ✨');
+    }
+  },
+
+  showFutureModal() {
+    document.getElementById('futureModal').classList.add('show');
+    document.querySelectorAll('#futureOptions .modal-option').forEach(o => o.classList.remove('selected'));
+    document.querySelector('#futureOptions .modal-option[data-years="1"]').classList.add('selected');
+  },
+
+  confirmFuture() {
+    const selected = document.querySelector('#futureOptions .modal-option.selected');
+    if (!selected) return;
+    const years = parseInt(selected.dataset.years);
+    const cards = Store.getPostcards();
+    const idx = this.currentOverlayIdx;
+    if (idx >= 0 && idx < cards.length) {
+      cards[idx].futureYears = years;
+      cards[idx].dueTime = cards[idx].createTime + years * 365 * 24*60*60*1000;
+      cards[idx].reminded = false;
+      Store.savePostcards(cards);
+    }
+    document.getElementById('futureModal').classList.remove('show');
+    showEncourage(`📅 已设为${years}年后提醒！`);
+    this.render();
+  },
+
+  showDriftModal() {
+    document.getElementById('driftModal').classList.add('show');
+    // 预填朋友ID
+    if (this._pendingFriend) {
+      document.getElementById('driftFriendId').value = this._pendingFriend.handle;
+    }
+    const routesEl = document.getElementById('driftRoutes');
+    routesEl.innerHTML = driftRoutes.map(r =>
+      `<div class="modal-option" data-route="${r.id}" onclick="this.parentElement.querySelectorAll('.modal-option').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')">
+        ${r.name}<br><span style="font-size:9px;color:var(--text-muted)">${r.cities.join('→')}</span>
+      </div>`
+    ).join('');
+  },
+
+  async confirmDrift() {
+    const friendInput = document.getElementById('driftFriendId').value.trim();
+    const selected = document.querySelector('#driftRoutes .modal-option.selected');
+    if (!friendInput) { showEncourage('请输入朋友ID～'); return; }
+    if (!selected) { showEncourage('请选择航线～'); return; }
+    const routeId = selected.dataset.route;
+    const route = driftRoutes.find(r => r.id === routeId);
+    const cards = Store.getPostcards();
+    const idx = this.currentOverlayIdx;
+    if (idx < 0 || idx >= cards.length) return;
+    const card = cards[idx];
+
+    // 本地保存漂流状态
+    card.driftRoute = routeId;
+    card.driftFriend = friendInput;
+    card.driftProgress = 0;
+    card.driftStartTime = Date.now();
+    Store.savePostcards(cards);
+
+    // 云端投递：查找朋友并发送
+    if (supabase && AuthModule.currentUser) {
+      const { data: friendProfile } = await supabase.from('profiles').select('*').eq('handle', friendInput.replace(/^@/, '')).maybeSingle();
+      if (friendProfile) {
+        await supabase.from('postcard_deliveries').insert({
+          sender_id: AuthModule.currentUser.id,
+          sender_name: AuthModule.currentProfile?.name || '旅行者',
+          recipient_id: friendProfile.id,
+          recipient_name: friendProfile.name,
+          image_data: card.imageBase64,
+          city: card.city,
+          message: card.message,
+          route_id: routeId,
+          route_name: route ? route.name : '',
+          status: 'traveling'
+        });
+        showEncourage(`✈️ 明信片已寄给 ${friendProfile.name}！`);
+      } else {
+        showEncourage(`✈️ 明信片开始漂流！（未找到该用户，仅本地模拟）`);
+      }
+    } else {
+      showEncourage(`✈️ 明信片开始漂流！`);
+    }
+
+    // 启动漂流动画
+    this.startDrift(idx);
+    document.getElementById('driftModal').classList.remove('show');
+    this.render();
+  },
+
+  startDrift(idx) {
+    const cards = Store.getPostcards();
+    const card = cards[idx];
+    const route = driftRoutes.find(r => r.id === card.driftRoute);
+    if (!route) return;
+    // 模拟每站3天（实际用3秒演示）
+    const stationInterval = 3000; // 3秒 = 3天演示
+    let progress = card.driftProgress || 0;
+    const driftLoop = setInterval(() => {
+      progress++;
+      if (progress >= route.cities.length) {
+        clearInterval(driftLoop);
+        card.driftProgress = route.cities.length;
+        card.reminded = false;
+        card.dueTime = Date.now();
+        Store.savePostcards(cards);
+        showEncourage(`📮 漂流结束！明信片回到了你手上`);
+        this.render();
+        checkNotifications();
+        return;
+      }
+      card.driftProgress = progress;
+      Store.savePostcards(cards);
+      showEncourage(`✈️ 正在${route.cities[progress]}停留……`);
+      if (this.currentOverlayIdx === idx) this.openOverlay(idx);
+    }, stationInterval);
+  }
+};
+
+// ==========================================
+// CalendarModule - 贴纸日历（个人 + 共创）
+// ==========================================
+const CalendarModule = {
+  currentMonth: new Date().getMonth(),
+  currentYear: new Date().getFullYear(),
+  selectedDay: null,
+  mode: 'personal',
+  activeSharedCalId: null,
+  sharedCalMonth: new Date().getMonth(),
+  sharedCalYear: new Date().getFullYear(),
+  sharedSelectedDay: null,
+  stickers: ['☕','🥗','🍰','🧁','🍵','🍦','🥐','🍩','🧃','🎂','🥤','🍕','🍜','🏃','🥑'],
+
+  init() {
+    this.ensureSharedCalendars();
+
+    // 模式切换
+    document.querySelectorAll('.calendar-mode-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.mode = btn.dataset.calmode;
+        document.querySelectorAll('.calendar-mode-tab').forEach(b => b.classList.remove('active'));
+        document.getElementById('personalCalendar').style.display = this.mode === 'personal' ? 'block' : 'none';
+        document.getElementById('sharedCalendarPanel').style.display = this.mode === 'shared' ? 'block' : 'none';
+        btn.classList.add('active');
+        this.render();
+      });
+    });
+
+    // 个人日历导航
+    document.getElementById('calPrev').addEventListener('click', () => {
+      this.currentMonth--;
+      if (this.currentMonth < 0) { this.currentMonth = 11; this.currentYear--; }
+      this.render();
+    });
+    document.getElementById('calNext').addEventListener('click', () => {
+      this.currentMonth++;
+      if (this.currentMonth > 11) { this.currentMonth = 0; this.currentYear++; }
+      this.render();
+    });
+
+    // 共创日历导航
+    document.getElementById('sharedCalPrev').addEventListener('click', () => {
+      this.sharedCalMonth--;
+      if (this.sharedCalMonth < 0) { this.sharedCalMonth = 11; this.sharedCalYear--; }
+      this.render();
+    });
+    document.getElementById('sharedCalNext').addEventListener('click', () => {
+      this.sharedCalMonth++;
+      if (this.sharedCalMonth > 11) { this.sharedCalMonth = 0; this.sharedCalYear++; }
+      this.render();
+    });
+
+    // 新建共创日历
+    document.getElementById('createSharedCalBtn').addEventListener('click', () => this.createSharedCalendar());
+
+    // 贴纸加评价按钮
+    document.getElementById('addStickerNoteBtn').addEventListener('click', () => {
+      if (!this.selectedDay) { showEncourage('先选择一个日期～'); return; }
+      const note = prompt('口味评价（将同步到牢骚信箱）：');
+      if (!note) return;
+      const calData = Store.getCalendar();
+      const key = `${this.currentYear}-${this.currentMonth}-${this.selectedDay}`;
+      const entry = calData.find(e => e.key === key);
+      if (entry) {
+        entry.note = note;
+        const complaints = Store.getComplaints();
+        complaints.push({ id: Date.now().toString(), text: note, source: `贴纸日历-${this.selectedDay}日`, emotions: ['☕'], time: Date.now() });
+        Store.saveComplaints(complaints);
+      }
+      Store.saveCalendar(calData);
+      this.render();
+      showEncourage('评价已同步到牢骚信箱 📮');
+    });
+    this.render();
+  },
+
+  ensureSharedCalendars() {
+    let cals = Store.getSharedCalendars();
+    if (!cals.length) {
+      cals = [{
+        id: 'sc_' + Date.now(),
+        name: '一起减肥打卡 🥗',
+        theme: 'diet',
+        createdAt: Date.now(),
+        members: [
+          { handle: 'me', name: '我', avatar: '🙂' },
+          { handle: 'xiaoya', name: '小雅', avatar: '🌸' }
+        ],
+        entries: [
+          { key: `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}`, stickers: [{ handle: 'xiaoya', s: '🥗' }] }
+        ]
+      }];
+      Store.saveSharedCalendars(cals);
+      this.activeSharedCalId = cals[0].id;
+    } else {
+      this.activeSharedCalId = cals[0].id;
+    }
+  },
+
+  createSharedCalendar() {
+    const name = prompt('共创日历名称（如：减肥打卡、咖啡日记）：');
+    if (!name) return;
+    const cals = Store.getSharedCalendars();
+    const profile = Store.getProfile() || { handle: 'me', name: '我', avatar: '🙂' };
+    const newCal = {
+      id: 'sc_' + Date.now(),
+      name: name,
+      theme: 'custom',
+      createdAt: Date.now(),
+      members: [{ handle: profile.handle, name: profile.name, avatar: profile.avatar }],
+      entries: []
+    };
+    cals.push(newCal);
+    Store.saveSharedCalendars(cals);
+    this.activeSharedCalId = newCal.id;
+    this.mode = 'shared';
+    document.querySelectorAll('.calendar-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.calmode === 'shared'));
+    document.getElementById('personalCalendar').style.display = 'none';
+    document.getElementById('sharedCalendarPanel').style.display = 'block';
+    this.render();
+    showEncourage('共创日历已创建，快邀请好友吧 ✨');
+  },
+
+  render() {
+    if (this.mode === 'personal') this.renderPersonal();
+    else this.renderShared();
+  },
+
+  renderPersonal() {
+    const label = document.getElementById('calMonthLabel');
+    label.textContent = `${this.currentYear}年${this.currentMonth+1}月`;
+
+    const grid = document.getElementById('calGrid');
+    const days = ['一','二','三','四','五','六','日'];
+    let html = days.map(d => `<div class="day-header">${d}</div>`).join('');
+
+    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+    let startOffset = (firstDay.getDay() || 7) - 1;
+    const daysInMonth = new Date(this.currentYear, this.currentMonth+1, 0).getDate();
+    const today = new Date();
+    const isCurrentMonth = today.getMonth() === this.currentMonth && today.getFullYear() === this.currentYear;
+    const calData = Store.getCalendar();
+
+    for (let i = 0; i < startOffset; i++) html += '<div class="day-cell" style="background:transparent"></div>';
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key = `${this.currentYear}-${this.currentMonth}-${d}`;
+      const entry = calData.find(e => e.key === key);
+      const isToday = isCurrentMonth && d === today.getDate();
+      const stickersHtml = entry ? entry.stickers.map(s => {
+        if (typeof s === 'string' && s.startsWith('<img')) return s;
+        return `<span>${s}</span>`;
+      }).join('') : '';
+      const noteHtml = entry && entry.note ? `<span class="sticker-note">${escHtml(entry.note)}</span>` : '';
+      html += `<div class="day-cell${isToday?' today':''}" data-day="${d}" onclick="CalendarModule.selectDay(${d})">
+        <span class="day-num">${d}</span>
+        <div class="sticker-icons">${stickersHtml}</div>
+        ${noteHtml}
+      </div>`;
+    }
+    grid.innerHTML = html;
+
+    const bar = document.getElementById('stickerBar');
+    bar.innerHTML = this.stickers.map(s =>
+      `<div class="sticker-item" data-sticker="${s}" onpointerdown="CalendarModule.startDragSticker(event,'${s}')">${s}</div>`
+    ).join('') + `<div class="custom-sticker-btn" onclick="CalendarModule.customSticker()">📷</div>`;
+  },
+
+  renderShared() {
+    const cals = Store.getSharedCalendars();
+    const list = document.getElementById('sharedCalendarList');
+    const detail = document.getElementById('sharedCalDetail');
+
+    list.innerHTML = cals.map(c => `<div class="shared-calendar-card ${c.id === this.activeSharedCalId ? 'active' : ''}" onclick="CalendarModule.selectSharedCal('${c.id}')">
+      <div class="sc-title">${escHtml(c.name)}</div>
+      <div class="sc-meta">${c.members.length} 位成员 · ${c.entries.length} 条记录</div>
+      <div class="sc-members">${c.members.map(m => `<div class="avatar-small">${m.avatar}</div>`).join('')}</div>
+    </div>`).join('');
+
+    const active = cals.find(c => c.id === this.activeSharedCalId);
+    if (!active) { detail.style.display = 'none'; return; }
+    detail.style.display = 'block';
+
+    document.getElementById('sharedCalMonthLabel').textContent = `${this.sharedCalYear}年${this.sharedCalMonth+1}月`;
+
+    const grid = document.getElementById('sharedCalGrid');
+    const days = ['一','二','三','四','五','六','日'];
+    let html = days.map(d => `<div class="day-header">${d}</div>`).join('');
+    const firstDay = new Date(this.sharedCalYear, this.sharedCalMonth, 1);
+    let startOffset = (firstDay.getDay() || 7) - 1;
+    const daysInMonth = new Date(this.sharedCalYear, this.sharedCalMonth+1, 0).getDate();
+    const today = new Date();
+    const isCurrentMonth = today.getMonth() === this.sharedCalMonth && today.getFullYear() === this.sharedCalYear;
+
+    for (let i = 0; i < startOffset; i++) html += '<div class="day-cell" style="background:transparent"></div>';
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const key = `${this.sharedCalYear}-${this.sharedCalMonth}-${d}`;
+      const entry = active.entries.find(e => e.key === key);
+      const isToday = isCurrentMonth && d === today.getDate();
+      const stickersHtml = entry ? entry.stickers.map(x => `<span title="${x.name}">${x.s}</span>`).join('') : '';
+      html += `<div class="day-cell${isToday?' today':''}" data-sday="${d}" onclick="CalendarModule.selectSharedDay(${d})">
+        <span class="day-num">${d}</span>
+        <div class="sticker-icons">${stickersHtml}</div>
+      </div>`;
+    }
+    grid.innerHTML = html;
+
+    const bar = document.getElementById('sharedStickerBar');
+    bar.innerHTML = this.stickers.map(s =>
+      `<div class="sticker-item" data-sticker="${s}" onpointerdown="CalendarModule.startSharedDragSticker(event,'${s}')">${s}</div>`
+    ).join('');
+
+    document.getElementById('sharedMembersRow').innerHTML = active.members.map(m =>
+      `<div class="avatar-small" title="${escHtml(m.name)}">${m.avatar}</div>`
+    ).join('') + `<button class="btn-small" style="margin-left:auto" onclick="CalendarModule.inviteMember()">+ 邀请</button>`;
+  },
+
+  selectSharedCal(id) {
+    this.activeSharedCalId = id;
+    this.renderShared();
+  },
+
+  selectDay(d) {
+    this.selectedDay = d;
+    document.querySelectorAll('#calGrid .day-cell').forEach(c => c.style.outline = 'none');
+    const cell = document.querySelector(`#calGrid .day-cell[data-day="${d}"]`);
+    if (cell) cell.style.outline = '2px solid var(--accent)';
+
+    // 如果当天有贴纸，显示清除按钮
+    const key = `${this.currentYear}-${this.currentMonth}-${d}`;
+    const calData = Store.getCalendar();
+    const entry = calData.find(e => e.key === key);
+    const clearBtn = document.getElementById('clearDayBtn');
+    if (entry && (entry.stickers.length > 0 || entry.note)) {
+      if (!clearBtn) {
+        const bar = document.getElementById('stickerBar');
+        const btn = document.createElement('button');
+        btn.id = 'clearDayBtn';
+        btn.className = 'btn-small';
+        btn.style.cssText = 'color:var(--stamp-error);margin-top:6px;display:block;margin-left:auto;margin-right:auto';
+        btn.textContent = `🗑️ 清除${d}日的贴纸`;
+        btn.onclick = () => CalendarModule.clearDay(d);
+        bar.appendChild(btn);
+      } else {
+        clearBtn.textContent = `🗑️ 清除${d}日的贴纸`;
+        clearBtn.style.display = 'block';
+        clearBtn.onclick = () => CalendarModule.clearDay(d);
+      }
+    } else {
+      if (clearBtn) clearBtn.style.display = 'none';
+    }
+  },
+
+  clearDay(d) {
+    const key = `${this.currentYear}-${this.currentMonth}-${d}`;
+    const calData = Store.getCalendar();
+    const idx = calData.findIndex(e => e.key === key);
+    if (idx >= 0) {
+      calData.splice(idx, 1);
+      Store.saveCalendar(calData);
+      this.renderPersonal();
+      this.selectDay(d);
+      showEncourage(`${d}日的贴纸已清除 ✨`);
+    }
+  },
+
+  selectSharedDay(d) {
+    this.sharedSelectedDay = d;
+    document.querySelectorAll('#sharedCalGrid .day-cell').forEach(c => c.style.outline = 'none');
+    const cell = document.querySelector(`#sharedCalGrid .day-cell[data-sday="${d}"]`);
+    if (cell) cell.style.outline = '2px solid var(--accent)';
+  },
+
+  startDragSticker(e, sticker) {
+    e.preventDefault();
+    if (!this.selectedDay) { showEncourage('先点击选择一个日期～'); return; }
+    const calData = Store.getCalendar();
+    const key = `${this.currentYear}-${this.currentMonth}-${this.selectedDay}`;
+    let entry = calData.find(e => e.key === key);
+    if (!entry) { entry = { key, stickers: [], note: null }; calData.push(entry); }
+    if (entry.stickers.length < 3) {
+      entry.stickers.push(sticker);
+      Store.saveCalendar(calData);
+      this.renderPersonal();
+      showEncourage(`${sticker} 已贴到${this.selectedDay}日`);
+    } else { showEncourage('每天最多3个贴纸哦～'); }
+  },
+
+  startSharedDragSticker(e, sticker) {
+    e.preventDefault();
+    if (!this.sharedSelectedDay) { showEncourage('先在共创日历选一个日期～'); return; }
+    const cals = Store.getSharedCalendars();
+    const active = cals.find(c => c.id === this.activeSharedCalId);
+    if (!active) return;
+    const profile = Store.getProfile() || { handle: 'me', name: '我', avatar: '🙂' };
+    const key = `${this.sharedCalYear}-${this.sharedCalMonth}-${this.sharedSelectedDay}`;
+    let entry = active.entries.find(e => e.key === key);
+    if (!entry) { entry = { key, stickers: [] }; active.entries.push(entry); }
+    if (entry.stickers.length < 4) {
+      entry.stickers.push({ handle: profile.handle, name: profile.name, avatar: profile.avatar, s: sticker });
+      Store.saveSharedCalendars(cals);
+      this.renderShared();
+      showEncourage(`${sticker} 已贴到共创日历 ${this.sharedSelectedDay}日`);
+    } else { showEncourage('每天最多4个贴纸哦～'); }
+  },
+
+  inviteMember() {
+    const handle = prompt('输入好友 ID 邀请加入：').trim().replace(/^@/, '');
+    if (!handle) return;
+    const friend = Store.getFriends().find(f => f.handle === handle);
+    if (!friend) { showEncourage('先添加这位好友才能邀请哦'); return; }
+    const cals = Store.getSharedCalendars();
+    const active = cals.find(c => c.id === this.activeSharedCalId);
+    if (active.members.find(m => m.handle === handle)) { showEncourage('Ta 已经在日历里啦'); return; }
+    active.members.push(friend);
+    Store.saveSharedCalendars(cals);
+    this.renderShared();
+    showEncourage(`已邀请 ${friend.name} 加入共创日历`);
+  },
+
+  customSticker() {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const base64 = await fileToBase64(file);
+      const sticker = await imageToStickerBase64(base64, 120);
+      if (this.selectedDay) {
+        const calData = Store.getCalendar();
+        const key = `${this.currentYear}-${this.currentMonth}-${this.selectedDay}`;
+        let entry = calData.find(x => x.key === key);
+        if (!entry) { entry = { key, stickers: [], note: null }; calData.push(entry); }
+        entry.stickers.push(`<img src="${sticker}" style="width:20px;height:20px;border-radius:50%">`);
+        Store.saveCalendar(calData);
+        this.renderPersonal();
+        showEncourage('定制贴纸已贴上 📷');
+      } else { showEncourage('先选择日期再贴定制贴纸'); }
+    };
+    input.click();
+  }
+};
+
+// ==========================================
+// TaskModule - 今日任务
+// ==========================================
+const TaskModule = {
+  encourageMessages: [
+    "虽然今天做的都是小碎片，但每一步都让你的长期目标前进了1% ✨",
+    "了不起！即使只是10分钟，你也在靠近目标 🌟",
+    "小任务完成 = 大目标分解。你正在做对的事 💪",
+    "今天的你比昨天多完成了一件事，这本身就是进步 🎯",
+    "不急，慢慢来。但你来了一步，就比站着强 🚶"
+  ],
+
+  init() {
+    document.getElementById('addMorningBtn').addEventListener('click', () => this.addTask('morning'));
+    document.getElementById('addAfternoonBtn').addEventListener('click', () => this.addTask('afternoon'));
+    document.getElementById('quadrantToggleBtn').addEventListener('click', () => {
+      const grid = document.getElementById('quadrantGrid');
+      grid.classList.toggle('show');
+      const btn = document.getElementById('quadrantToggleBtn');
+      btn.textContent = grid.classList.contains('show') ? '收起象限 ▼' : '展开象限 ▼';
+      if (grid.classList.contains('show')) this.renderQuadrant();
+    });
+    this.render();
+  },
+
+  addTask(period) {
+    const name = prompt('任务名称：');
+    if (!name) return;
+    const tasks = Store.getTasks();
+    tasks.push({
+      id: Date.now().toString(),
+      name: name.trim(),
+      period: period,
+      done: false,
+      quadrant: null
+    });
+    Store.saveTasks(tasks);
+    this.render();
+  },
+
+  render() {
+    const tasks = Store.getTasks();
+    const morning = tasks.filter(t => t.period === 'morning');
+    const afternoon = tasks.filter(t => t.period === 'afternoon');
+    const doneCount = tasks.filter(t => t.done).length;
+    const total = tasks.length;
+    const progress = total > 0 ? Math.round(doneCount/total*100) : 0;
+
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressLabel').textContent = progress + '%';
+
+    document.getElementById('morningTasks').innerHTML = morning.map(t => this.renderTaskCard(t)).join('');
+    document.getElementById('afternoonTasks').innerHTML = afternoon.map(t => this.renderTaskCard(t)).join('');
+  },
+
+  renderTaskCard(task) {
+    const doneCls = task.done ? ' checked' : '';
+    const nameCls = task.done ? ' done' : '';
+    return `<div class="task-card" data-id="${task.id}">
+      <div class="task-check${doneCls}" onclick="TaskModule.toggleTask('${task.id}')">${task.done?'✓':''}</div>
+      <span class="task-name${nameCls}">${escHtml(task.name)}</span>
+    </div>`;
+  },
+
+  toggleTask(id) {
+    const tasks = Store.getTasks();
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    task.done = !task.done;
+    Store.saveTasks(tasks);
+    if (task.done) {
+      const msg = this.encourageMessages[Math.floor(Math.random()*this.encourageMessages.length)];
+      showEncourage(msg);
+      // 同步到牢骚信箱
+      const complaints = Store.getComplaints();
+      complaints.push({
+        id: Date.now().toString(),
+        text: `完成了任务：${task.name}`,
+        source: `来自今日任务`,
+        emotions: ['✅'],
+        time: Date.now()
+      });
+      Store.saveComplaints(complaints);
+    }
+    this.render();
+  },
+
+  renderQuadrant() {
+    const tasks = Store.getTasks();
+    const qUI = document.getElementById('qUI');
+    const qINU = document.getElementById('qINU');
+    const qUNI = document.getElementById('qUNI');
+    const qNUNI = document.getElementById('qNUNI');
+
+    const byQ = { ui: [], inu: [], uni: [], nuni: [] };
+    tasks.forEach(t => {
+      const q = t.quadrant || 'nuni';
+      byQ[q].push(t);
+    });
+
+    qUI.innerHTML = byQ.ui.map(t => `<div style="font-size:11px;color:var(--text-primary);margin:2px 0">${escHtml(t.name)}</div>`).join('');
+    qINU.innerHTML = byQ.inu.map(t => `<div style="font-size:11px;color:var(--text-primary);margin:2px 0">${escHtml(t.name)}</div>`).join('');
+    qUNI.innerHTML = byQ.uni.map(t => `<div style="font-size:11px;color:var(--text-primary);margin:2px 0">${escHtml(t.name)}</div>`).join('');
+    qNUNI.innerHTML = byQ.nuni.map(t => `<div style="font-size:11px;color:var(--text-primary);margin:2px 0">${escHtml(t.name)}</div>`).join('');
+  }
+};
+
+// ==========================================
+// MailboxModule - 牢骚信箱
+// ==========================================
+const MailboxModule = {
+  emotions: ['😤','😭','🙄','🤯','😢'],
+  selectedEmos: [],
+
+  init() {
+    // 情绪选择
+    document.querySelectorAll('#emotionSelector .emo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const emo = btn.dataset.emo;
+        btn.classList.toggle('selected');
+        if (this.selectedEmos.includes(emo)) {
+          this.selectedEmos = this.selectedEmos.filter(e => e !== emo);
+        } else {
+          if (this.selectedEmos.length < 3) this.selectedEmos.push(emo);
+        }
+      });
+    });
+
+    // 投递
+    document.getElementById('complaintSubmitBtn').addEventListener('click', () => this.submit());
+    this.render();
+  },
+
+  submit() {
+    const text = document.getElementById('complaintInput').value.trim();
+    if (!text) { showEncourage('写点什么再投递～'); return; }
+    const complaints = Store.getComplaints();
+    complaints.push({
+      id: Date.now().toString(),
+      text: text,
+      source: '来自信箱',
+      emotions: [...this.selectedEmos],
+      time: Date.now()
+    });
+    Store.saveComplaints(complaints);
+    document.getElementById('complaintInput').value = '';
+    this.selectedEmos = [];
+    document.querySelectorAll('#emotionSelector .emo-btn').forEach(b => b.classList.remove('selected'));
+    this.render();
+    showEncourage('牢骚已投递 📮');
+  },
+
+  render() {
+    const complaints = Store.getComplaints();
+    const list = document.getElementById('complaintList');
+    list.innerHTML = complaints.sort((a,b) => b.time - a.time).map(c => `
+      <div class="complaint-item">
+        <div class="complaint-text">${escHtml(c.text)}</div>
+        <div class="complaint-meta">
+          <span class="complaint-source">${escHtml(c.source)}</span>
+          <span class="complaint-emos">${c.emotions.join('')}</span>
+          <span class="complaint-time">${new Date(c.time).toLocaleDateString()}</span>
+        </div>
+      </div>
+    `).join('');
+
+    // 情绪统计
+    this.renderStats();
+  },
+
+  renderStats() {
+    const complaints = Store.getComplaints();
+    const weekStart = Date.now() - 7*24*60*60*1000;
+    const weekComplaints = complaints.filter(c => c.time >= weekStart);
+    const statsEl = document.getElementById('emotionStats');
+    const emoCount = {};
+    this.emotions.forEach(e => emoCount[e] = 0);
+    weekComplaints.forEach(c => c.emotions.forEach(e => { if (emoCount[e] !== undefined) emoCount[e]++; }));
+    const maxCount = Math.max(...Object.values(emoCount), 1);
+
+    let statsHtml = '<div class="stats-title">📊 本周情绪统计</div>';
+    this.emotions.forEach(e => {
+      const count = emoCount[e];
+      const width = Math.round(count/maxCount*100);
+      statsHtml += `<div class="stat-row">
+        <span class="stat-emo">${e}</span>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${width}%"></div></div>
+        <span class="stat-count">${count}</span>
+      </div>`;
+    });
+    statsEl.innerHTML = statsHtml;
+  }
+};
+
+// ==========================================
+// ReviewModule - 回顾
+// ==========================================
+const ReviewModule = {
+  period: 'week',
+
+  init() {
+    document.querySelectorAll('.review-period').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.review-period').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.period = btn.dataset.period;
+        this.render();
+      });
+    });
+    this.render();
+  },
+
+  render() {
+    this.renderStickerCloud();
+    this.renderPie();
+    this.renderDriftTrace();
+    this.renderEncourage();
+  },
+
+  renderStickerCloud() {
+    const calData = Store.getCalendar();
+    const periodStart = this.period === 'week'
+      ? Date.now() - 7*24*60*60*1000
+      : Date.now() - 30*24*60*60*1000;
+
+    const stickerCount = {};
+    CalendarModule.stickers.forEach(s => stickerCount[s] = 0);
+    calData.forEach(e => {
+      if (e.stickers) e.stickers.forEach(s => { if (stickerCount[s] !== undefined) stickerCount[s]++; });
+    });
+
+    const cloud = document.getElementById('stickerCloud');
+    const sorted = Object.entries(stickerCount).filter(([k,v]) => v > 0).sort((a,b) => b[1]-a[1]);
+    if (!sorted.length) {
+      cloud.innerHTML = '<div class="empty-state" style="padding:8px"><span class="empty-icon">☕</span><br>还没有贴纸记录</div>';
+      return;
+    }
+    const max = sorted[0][1];
+    cloud.innerHTML = sorted.map(([emoji, count]) => {
+      const size = Math.max(20, Math.round(36 * count / max));
+      return `<div class="cloud-item">
+        <span class="cloud-emoji" style="font-size:${size}px">${emoji}</span>
+        <span class="cloud-count">${count}次</span>
+      </div>`;
+    }).join('');
+  },
+
+  renderPie() {
+    const tasks = Store.getTasks();
+    const pie = document.getElementById('quadrantPie');
+    const total = tasks.length || 1;
+    const qCounts = {
+      ui: tasks.filter(t => t.quadrant === 'ui' || (!t.quadrant && !t.done)).length,
+      inu: tasks.filter(t => t.quadrant === 'inu').length,
+      uni: tasks.filter(t => t.quadrant === 'uni').length,
+      nuni: tasks.filter(t => t.quadrant === 'nuni' || (!t.quadrant && t.done)).length
+    };
+    // 简化：如果没设四象限，用默认分布
+    if (!tasks.some(t => t.quadrant)) {
+      qCounts.ui = Math.ceil(total*0.2);
+      qCounts.inu = Math.ceil(total*0.3);
+      qCounts.uni = Math.ceil(total*0.2);
+      qCounts.nuni = total - qCounts.ui - qCounts.inu - qCounts.uni;
+    }
+    const degPer = 360 / total;
+    const angles = {
+      ui: qCounts.ui * degPer,
+      inu: qCounts.inu * degPer,
+      uni: qCounts.uni * degPer,
+      nuni: qCounts.nuni * degPer
+    };
+    pie.style.background = `conic-gradient(
+      var(--stamp-red) 0deg ${angles.ui}deg,
+      var(--stamp-gold) ${angles.ui}deg ${angles.ui+angles.inu}deg,
+      var(--stamp-blue) ${angles.ui+angles.inu}deg ${angles.ui+angles.inu+angles.uni}deg,
+      var(--border-subtle) ${angles.ui+angles.inu+angles.uni}deg 360deg
+    )`;
+  },
+
+  renderDriftTrace() {
+    const cards = Store.getPostcards();
+    const driftingCards = cards.filter(c => c.driftRoute);
+    const trace = document.getElementById('driftTrace');
+
+    if (!driftingCards.length) {
+      // 展示所有城市的邮票链条
+      const cityCards = cards.filter(c => c.city);
+      if (!cityCards.length) {
+        trace.innerHTML = '<div style="color:var(--text-muted);font-family:var(--font-doodle);text-align:center;width:100%">还没有漂流轨迹</div>';
+        return;
+      }
+      trace.innerHTML = cityCards.map(c => {
+        const colorCls = continentColor(c.city);
+        const borderColor = colorCls === 'stamp-red' ? 'var(--stamp-red)'
+          : colorCls === 'stamp-gold' ? 'var(--stamp-gold)'
+          : colorCls === 'stamp-blue' ? 'var(--stamp-blue)'
+          : 'var(--stamp-green)';
+        return `<span class="trace-stamp" style="border-color:${borderColor}">
+          <span class="ts-emoji">${cityEmoji(c.city)}</span>
+          <span class="ts-name">${escHtml(c.city)}</span>
+        </span>`;
+      }).join('<span class="trace-arrow">→</span>');
+      return;
+    }
+
+    trace.innerHTML = driftingCards.map(c => {
+      const route = driftRoutes.find(r => r.id === c.driftRoute);
+      if (!route) return '';
+      const visited = c.driftProgress || 0;
+      return route.cities.slice(0, visited+1).map((city, ci) => {
+        return `<span class="trace-stamp">
+          <span class="ts-emoji">${route.emoji[ci]}</span>
+          <span class="ts-name">${city}</span>
+        </span>`;
+      }).join('<span class="trace-arrow">→</span>');
+    }).join('');
+  },
+
+  renderEncourage() {
+    const cards = Store.getPostcards();
+    const tasks = Store.getTasks();
+    const complaints = Store.getComplaints();
+    const doneTasks = tasks.filter(t => t.done).length;
+    const totalTasks = tasks.length;
+    const complaintCount = complaints.length;
+    const postcardCount = cards.length;
+    const periodLabel = this.period === 'week' ? '本周' : '本月';
+
+    const text = `你${periodLabel}发了${complaintCount}次牢骚，但完成了${doneTasks}个小任务，寄出了${postcardCount}张明信片。${doneTasks>0?'距离长期目标又近了一步。':'但没关系，下周再开始也行。'} 🌟`;
+    document.getElementById('encourageText').textContent = text;
+  }
+};
+
+// ==========================================
+// Utils: 照片转卡通贴纸（Canvas 简易版）
+// ==========================================
+function imageToStickerBase64(imgSrc, size = 220) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    if (!imgSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      // 圆角裁切
+      ctx.beginPath();
+      const r = size * 0.18;
+      ctx.moveTo(r, 0);
+      ctx.lineTo(size - r, 0);
+      ctx.quadraticCurveTo(size, 0, size, r);
+      ctx.lineTo(size, size - r);
+      ctx.quadraticCurveTo(size, size, size - r, size);
+      ctx.lineTo(r, size);
+      ctx.quadraticCurveTo(0, size, 0, size - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.clip();
+      // 绘制图片（居中裁切）
+      const scale = Math.max(size / img.width, size / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      // 提升饱和度/对比度（卡通感）
+      const imgData = ctx.getImageData(0, 0, size, size);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        // 提升对比度
+        data[i] = ((data[i] - 128) * 1.25) + 128;
+        data[i + 1] = ((data[i + 1] - 128) * 1.25) + 128;
+        data[i + 2] = ((data[i + 2] - 128) * 1.25) + 128;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      // 白色描边
+      ctx.lineWidth = size * 0.05;
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+      ctx.stroke();
+      // 外阴影
+      ctx.shadowColor = 'rgba(120,100,75,0.25)';
+      ctx.shadowBlur = 10; ctx.shadowOffsetX = 3; ctx.shadowOffsetY = 4;
+      ctx.stroke();
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(imgSrc);
+    img.src = imgSrc;
+  });
+}
+
+function generateQRCodeData(handle) {
+  const canvas = document.getElementById('qrCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 160, 160);
+  ctx.fillStyle = '#4a3a2a';
+  const cell = 8;
+  const str = handle + Date.now();
+  for (let y = 12; y < 148; y += cell) {
+    for (let x = 12; x < 148; x += cell) {
+      let hash = 0;
+      const seed = str + x + ',' + y;
+      for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+      if (Math.abs(hash) % 2 === 0) ctx.fillRect(x, y, cell - 1, cell - 1);
+    }
+  }
+  // 定位角
+  ctx.fillStyle = '#4a3a2a';
+  [[16,16],[104,16],[16,104]].forEach(([ox,oy])=>{
+    ctx.fillRect(ox, oy, 28, 28);
+    ctx.clearRect(ox+6, oy+6, 16, 16);
+    ctx.fillRect(ox+10, oy+10, 8, 8);
+  });
+}
+
+// ==========================================
+// Account / Friends / Feed 模块
+// ==========================================
+const SocialModule = {
+  currentTab: 'feed',
+  pendingSticker: null,
+  _friends: [],
+  _feed: [],
+  _receivedPostcards: [],
+
+  init() {
+    this.bindEvents();
+    this.render();
+  },
+
+  async loadSocialData() {
+    if (!supabase || !AuthModule.currentUser) return;
+    try {
+      // 8秒超时保护，防止 Supabase 查询卡死
+      const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 8000));
+      const queryPromise = Promise.all([
+        Store.getFriends().catch(() => []),
+        Store.getFeed().catch(() => []),
+        this.loadReceivedPostcards().catch(() => [])
+      ]);
+      const result = await Promise.race([queryPromise, timeout]);
+      if (result === 'timeout') {
+        console.warn('loadSocialData timed out, using empty data');
+        this._friends = [];
+        this._feed = [];
+        this._receivedPostcards = [];
+      } else {
+        this._friends = result[0] || [];
+        this._feed = result[1] || [];
+        this._receivedPostcards = result[2] || [];
+      }
+    } catch(e) {
+      console.error('loadSocialData error:', e);
+      this._friends = [];
+      this._feed = [];
+      this._receivedPostcards = [];
+    }
+    this.render();
+  },
+
+  async loadReceivedPostcards() {
+    if (!supabase || !AuthModule.currentUser) return [];
+    const uid = AuthModule.currentUser.id;
+    const { data } = await supabase.from('postcard_deliveries')
+      .select('*').eq('recipient_id', uid)
+      .order('created_at', { ascending: false }).limit(20);
+    return data || [];
+  },
+
+  profile() { return Store.getProfile(); },
+
+  bindEvents() {
+    document.querySelectorAll('.social-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.currentTab = btn.dataset.tab;
+        document.querySelectorAll('.social-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.social-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + this.currentTab).classList.add('active');
+        this.renderPanel(this.currentTab);
+      });
+    });
+
+    const feedUpload = document.getElementById('feedPhotoUpload');
+    const feedInput = document.getElementById('feedPhotoInput');
+    feedUpload.addEventListener('click', () => feedInput.click());
+    feedInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const base64 = await fileToBase64(file);
+      const sticker = await imageToStickerBase64(base64, 220);
+      this.pendingSticker = sticker;
+      document.getElementById('feedStickerPreview').innerHTML = `<img src="${sticker}" alt="sticker">`;
+      document.getElementById('feedStickerPreview').style.display = 'block';
+      feedUpload.style.display = 'none';
+    });
+
+    document.getElementById('feedPostBtn').addEventListener('click', () => this.postFeed());
+    document.getElementById('friendSearchBtn').addEventListener('click', () => this.addFriend());
+    document.getElementById('friendSearchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') this.addFriend(); });
+    document.getElementById('saveProfileBtn').addEventListener('click', () => this.saveProfile());
+    document.getElementById('viewQrBtn').addEventListener('click', () => {
+      const qr = document.getElementById('qrCard');
+      qr.style.display = qr.style.display === 'none' ? 'block' : 'none';
+      if (qr.style.display === 'block') this.renderQR();
+    });
+    document.getElementById('goReviewBtn').addEventListener('click', () => switchPage('page-review'));
+  },
+
+  async postFeed() {
+    const caption = document.getElementById('feedCaption').value.trim();
+    if (!this.pendingSticker && !caption) return;
+    const p = this.profile();
+
+    if (supabase && AuthModule.currentUser) {
+      const { data, error } = await supabase.from('feed_posts').insert({
+        author_id: AuthModule.currentUser.id,
+        author_name: p.name, author_avatar: p.avatar,
+        sticker: this.pendingSticker, caption: caption
+      }).select();
+
+      if (error) {
+        console.error('Feed insert error:', error);
+        showEncourage('发布失败：' + (error.message || '数据库错误，请检查表是否已创建'));
+        return;
+      }
+
+      if (this.pendingSticker) {
+        const calData = Store.getCalendar();
+        const today = new Date();
+        const key = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+        let entry = calData.find(e => e.key === key);
+        if (!entry) { entry = { key, stickers: [], note: null }; calData.push(entry); }
+        entry.stickers.push(`<img src="${this.pendingSticker}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle">`);
+        Store.saveCalendar(calData);
+      }
+    } else {
+      showEncourage('需要先登录才能发布');
+      return;
+    }
+
+    this.pendingSticker = null;
+    document.getElementById('feedCaption').value = '';
+    document.getElementById('feedStickerPreview').innerHTML = '';
+    document.getElementById('feedStickerPreview').style.display = 'none';
+    document.getElementById('feedPhotoUpload').style.display = 'flex';
+    document.getElementById('feedPhotoInput').value = '';
+    await this.loadSocialData();
+    showEncourage('发布成功！ ✨');
+  },
+
+  async addFriend() {
+    let input = document.getElementById('friendSearchInput').value.trim().replace(/^@/, '');
+    if (!input) return;
+    if (!supabase || !AuthModule.currentUser) { showEncourage('需要先登录'); return; }
+
+    const { data: user } = await supabase.from('profiles').select('*').eq('handle', input).maybeSingle();
+    if (!user) { showEncourage('未找到这个 ID'); return; }
+    if (user.id === AuthModule.currentUser.id) { showEncourage('不能加自己哦'); return; }
+
+    const existing = this._friends.find(f => f.id === user.id);
+    if (existing) { showEncourage('已经是好友啦'); return; }
+
+    const uid = AuthModule.currentUser.id;
+    const { data: c1 } = await supabase.from('friendships').select('id').eq('user_id', uid).eq('friend_id', user.id).maybeSingle();
+    const { data: c2 } = await supabase.from('friendships').select('id').eq('user_id', user.id).eq('friend_id', uid).maybeSingle();
+    if (c1 || c2) { showEncourage('已经发送过好友请求了'); return; }
+
+    await supabase.from('friendships').insert([
+      { user_id: uid, friend_id: user.id, status: 'accepted' },
+      { user_id: user.id, friend_id: uid, status: 'accepted' }
+    ]);
+
+    document.getElementById('friendSearchInput').value = '';
+    await this.loadSocialData();
+    showEncourage(`已添加 ${user.name} 为好友 🎉`);
+  },
+
+  sendPostcardToFriend(friendId) {
+    const friend = this._friends.find(f => f.id === friendId || f.handle === friendId);
+    if (!friend) return;
+    switchPage('page-postcard');
+    document.getElementById('cardCity').value = friend.name + ' 的城市';
+    document.getElementById('cardMessage').value = `这是一张漂给 @${friend.handle} 的明信片 ✈️`;
+    PostcardModule._pendingFriend = friend;
+    showEncourage(`快写给 @${friend.handle} 吧`);
+  },
+
+  async likePost(postId) {
+    if (!supabase || !AuthModule.currentUser) return;
+    const uid = AuthModule.currentUser.id;
+    const post = this._feed.find(p => p.id === postId);
+    if (!post) return;
+    if (post.likedByMe) {
+      await supabase.from('feed_likes').delete().eq('post_id', postId).eq('user_id', uid);
+      await supabase.from('feed_posts').update({ likes: Math.max(0, post.likes - 1) }).eq('id', postId);
+    } else {
+      await supabase.from('feed_likes').insert({ post_id: postId, user_id: uid });
+      await supabase.from('feed_posts').update({ likes: post.likes + 1 }).eq('id', postId);
+    }
+    await this.loadSocialData();
+  },
+
+  saveProfile() {
+    const p = this.profile();
+    p.name = document.getElementById('profileNameInput').value.trim() || p.name;
+    p.bio = document.getElementById('profileBioInput').value.trim();
+    Store.saveProfile(p);
+    if (supabase) AuthModule.currentProfile = p;
+    this.render();
+    showEncourage('资料已保存 ✨');
+  },
+
+  renderQR() {
+    const p = this.profile();
+    document.getElementById('qrHandle').textContent = '@' + p.handle;
+    generateQRCodeData(p.handle);
+  },
+
+  render() {
+    const p = this.profile();
+    if (!p) return;
+    document.getElementById('composerName').textContent = p.name;
+    document.getElementById('composerAvatar').textContent = p.avatar;
+    document.getElementById('profileNameInput').value = p.name;
+    document.getElementById('profileHandle').textContent = '@' + p.handle;
+    document.getElementById('profileBioInput').value = p.bio || '';
+    document.getElementById('profileAvatar').textContent = p.avatar;
+    document.getElementById('mePostCount').textContent = this._feed.filter(x => x.authorId === (AuthModule.currentUser?.id)).length;
+    document.getElementById('meFriendCount').textContent = this._friends.length;
+    document.getElementById('meCardCount').textContent = Store.getPostcards().length;
+    this.renderPanel(this.currentTab);
+  },
+
+  renderPanel(tab) {
+    if (tab === 'feed') this.renderFeed();
+    if (tab === 'friends') this.renderFriends();
+    if (tab === 'me') this.renderMe();
+  },
+
+  renderFeed() {
+    const list = document.getElementById('feedList');
+    const feed = this._feed;
+    let receivedHtml = '';
+    if (this._receivedPostcards && this._receivedPostcards.length) {
+      receivedHtml = '<div class="received-postcards"><div class="rp-title">📬 收到的明信片</div>';
+      receivedHtml += this._receivedPostcards.map(c => {
+        const isUnread = c.status !== 'read';
+        const timeStr = new Date(c.created_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+        return `<div class="received-card ${isUnread ? 'unread' : ''}" onclick="SocialModule.viewReceivedPostcard('${c.id}')">
+          <div class="rp-header">
+            <div class="avatar-small">${c.sender_name?.charAt(0) || '✉️'}</div>
+            <div><div class="rp-sender">来自 ${escHtml(c.sender_name)}</div>
+            <div class="rp-route">${c.route_name || c.city || ''} · ${timeStr}</div></div>
+          </div>
+          <div class="rp-preview">${escHtml((c.message || '').slice(0, 50))}${c.message && c.message.length > 50 ? '...' : ''}</div>
+        </div>`;
+      }).join('') + '</div>';
+    }
+    if (!feed.length && !this._receivedPostcards.length) {
+      list.innerHTML = receivedHtml + '<div class="empty-state"><span class="empty-icon">🌟</span><br>还没有动态<br>添加好友后就能看到啦</div>';
+      return;
+    }
+    list.innerHTML = receivedHtml + feed.map(p => {
+      const timeStr = new Date(p.time).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const stickerHtml = p.sticker ? `<div class="feed-sticker"><img src="${p.sticker}" alt="sticker"></div>` : '';
+      const isMine = AuthModule.currentUser && p.authorId === AuthModule.currentUser.id;
+      return `<div class="feed-item">
+        <div class="feed-item-header">
+          <div class="avatar-small">${p.authorAvatar}</div>
+          <span class="feed-author-name">${escHtml(p.authorName)}</span>
+          <span class="feed-time">${timeStr}</span>
+        </div>
+        ${stickerHtml}
+        <div class="feed-caption">${escHtml(p.caption)}</div>
+        <div class="feed-actions">
+          <button class="feed-like-btn ${p.likedByMe ? 'liked' : ''}" onclick="SocialModule.likePost('${p.id}')">
+            ${p.likedByMe ? '❤️' : '🤍'} ${p.likes}
+          </button>
+          ${isMine ? `<button class="feed-like-btn" style="color:var(--stamp-error)" onclick="SocialModule.deleteFeedPost('${p.id}')">🗑️ 删除</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  async deleteFeedPost(postId) {
+    if (!confirm('删除这条动态？')) return;
+    if (supabase && AuthModule.currentUser) {
+      const { error } = await supabase.from('feed_posts').delete().eq('id', postId).eq('author_id', AuthModule.currentUser.id);
+      if (error) {
+        console.error('Delete feed post error:', error);
+        showEncourage('删除失败：' + (error.message || '未知错误'));
+        return;
+      }
+    }
+    await this.loadSocialData();
+    showEncourage('动态已删除 ✨');
+  },
+
+  async viewReceivedPostcard(postcardId) {
+    const card = this._receivedPostcards.find(c => c.id === postcardId);
+    if (!card) return;
+    if (supabase && card.status !== 'read') {
+      await supabase.from('postcard_deliveries').update({ status: 'read', read_at: new Date().toISOString() }).eq('id', postcardId);
+    }
+    const front = document.getElementById('overlayFront');
+    const back = document.getElementById('overlayBack');
+    if (card.image_data) {
+      front.innerHTML = `<div class="photo-frame">
+        <img src="${card.image_data}" alt="明信片照片" onerror="this.parentElement.innerHTML='<div class=no-photo>📷</div>'">
+        <div class="postmark-overlay"><div class="pm-city">${escHtml(card.city || '')}</div><div class="pm-emoji">📮</div></div>
+        <div class="doodle-deco">✈️ 来自 ${escHtml(card.sender_name)}</div><div class="mini-seal">漂流本</div></div>`;
+    } else {
+      front.innerHTML = `<div class="photo-frame"><div class="no-photo" style="font-size:16px">📬 来自<br><span style="font-size:14px;font-family:var(--font-doodle)">${escHtml(card.sender_name)}</span></div>
+        <div class="postmark-overlay"><div class="pm-city">${escHtml(card.city || '')}</div><div class="pm-emoji">📮</div></div>
+        <div class="doodle-deco">✈️ ${escHtml(card.sender_name)}</div><div class="mini-seal">漂流本</div></div>`;
+    }
+    const pcCells = Array(6).fill('<div class="pc-cell"></div>').join('');
+    back.innerHTML = `<div class="back-header"><div class="postcode-box">${pcCells}</div><div class="back-stamp">✉️</div></div>
+      <div class="letter-area"><div class="letter-text">${escHtml(card.message || '')}</div>
+      <div class="back-postmark"><div class="pm-city">${escHtml(card.city || '')}</div><div class="pm-icon">📮</div></div></div>
+      <div class="back-footer"><span>来自 ${escHtml(card.sender_name)}</span><span>${card.route_name || ''}</span></div>`;
+    document.getElementById('overlayFlipCard').classList.remove('flipped');
+    document.getElementById('overlayActions').innerHTML = `<button class="btn-small" onclick="document.getElementById('overlayFlipCard').classList.toggle('flipped')">🔄 翻转</button>`;
+    document.getElementById('postcard-overlay').classList.add('show');
+    PostcardModule.currentOverlayIdx = -1;
+    await this.loadSocialData();
+  },
+
+  renderFriends() {
+    const list = document.getElementById('friendList');
+    const friends = this._friends;
+    if (!friends.length) {
+      list.innerHTML = '<div class="empty-state"><span class="empty-icon">🫂</span><br>还没有好友<br>用 ID 搜索添加吧</div>';
+      return;
+    }
+    list.innerHTML = friends.map(f => `<div class="friend-item">
+      <div class="friend-avatar">${f.avatar || '🙂'}</div>
+      <div class="friend-info">
+        <div class="friend-name">${escHtml(f.name)}</div>
+        <div class="friend-handle">@${escHtml(f.handle)}</div>
+      </div>
+      <div class="friend-actions">
+        <button class="btn-small" onclick="SocialModule.sendPostcardToFriend('${f.id}')">寄明信片</button>
+      </div>
+    </div>`).join('');
+  },
+
+  renderMe() {
+    document.getElementById('mePostCount').textContent = this._feed.filter(x => x.authorId === (AuthModule.currentUser?.id)).length;
+    document.getElementById('meFriendCount').textContent = this._friends.length;
+    document.getElementById('meCardCount').textContent = Store.getPostcards().length;
+  },
+
+  onRealtimeUpdate() { this.loadSocialData(); }
+};
+
+// ==========================================
+// App - 应用初始化与实时订阅
+// ==========================================
+const App = {
+  _initialized: false,
+  _subscriptions: [],
+
+  async init() {
+    if (this._initialized) {
+      await SocialModule.loadSocialData();
+      return;
+    }
+    this._initialized = true;
+
+    // 初始化各模块
+    try { PostcardModule.init(); } catch(e) { console.error('PostcardModule.init error:', e); }
+    try { CalendarModule.init(); } catch(e) { console.error('CalendarModule.init error:', e); }
+    try { TaskModule.init(); } catch(e) { console.error('TaskModule.init error:', e); }
+    try { MailboxModule.init(); } catch(e) { console.error('MailboxModule.init error:', e); }
+    try { ReviewModule.init(); } catch(e) { console.error('ReviewModule.init error:', e); }
+    try { SocialModule.init(); } catch(e) { console.error('SocialModule.init error:', e); }
+    document.getElementById('app').style.opacity = '1';
+
+    // 加载社交数据
+    try { await SocialModule.loadSocialData(); } catch(e) { console.error('loadSocialData error:', e); }
+
+    // 实时订阅
+    if (supabase && AuthModule.currentUser) {
+      this.setupRealtime();
+    }
+
+    requestNotify();
+    setInterval(checkNotifications, 30000);
+    checkNotifications();
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkNotifications(); SocialModule.loadSocialData(); } });
+  },
+
+  setupRealtime() {
+    const uid = AuthModule.currentUser.id;
+    // 订阅收到的明信片
+    const sub1 = supabase.channel('postcard-deliveries')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'postcard_deliveries',
+        filter: `recipient_id=eq.${uid}`
+      }, (payload) => {
+        showEncourage(`📬 收到一张来自 ${payload.new.sender_name} 的明信片！`);
+        SocialModule.loadSocialData();
+      })
+      .subscribe();
+
+    // 订阅朋友圈新动态
+    const sub2 = supabase.channel('feed-posts')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'feed_posts'
+      }, () => {
+        SocialModule.loadSocialData();
+      })
+      .subscribe();
+
+    // 订阅好友关系变化
+    const sub3 = supabase.channel('friendships')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'friendships',
+        filter: `friend_id=eq.${uid}`
+      }, () => {
+        showEncourage('🎉 你有新的好友！');
+        SocialModule.loadSocialData();
+      })
+      .subscribe();
+
+    this._subscriptions = [sub1, sub2, sub3];
+  }
+};
+
+// ==========================================
+// 启动
+// ==========================================
+
+// 安全保险：5秒后强制关闭加载遮罩
+setTimeout(function() {
+  var lo = document.getElementById('loadingOverlay');
+  if (lo) lo.style.display = 'none';
+}, 5000);
+
+// 点击加载遮罩也可以关闭它
+document.addEventListener('DOMContentLoaded', function() {
+  var lo = document.getElementById('loadingOverlay');
+  if (lo) lo.addEventListener('click', function() { lo.style.display = 'none'; });
+});
+
+function startApp() {
+  // 检查 supabase 是否为 client 实例（有 .auth），而非库本身
+  if (supabase && supabase.auth && typeof supabase.auth.onAuthStateChange === 'function') {
+    // 监听认证状态变化
+    supabase.auth.onAuthStateChange((event, session) => {
+      AuthModule.onAuthStateChange(session);
+    });
+    // 检查当前会话
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        AuthModule.onAuthStateChange(session);
+      } else {
+        document.getElementById('auth-screen').style.display = 'flex';
+        document.getElementById('app').style.opacity = '0.3';
+      }
+    }).catch(function(e) {
+      console.error('getSession error:', e);
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('app').style.opacity = '0.3';
+    });
+  } else {
+    // Supabase 未加载 - 显示登录页但附带错误提示
+    document.getElementById('auth-screen').style.display = 'flex';
+    var errEl = document.getElementById('authError');
+    if (errEl) {
+      errEl.innerHTML = '⚠️ Supabase 库加载失败<br>请检查网络连接后刷新页面<br>（可能需要科学上网）';
+      errEl.style.color = '#c0392b';
+    }
+    var btn = document.getElementById('authSubmitBtn');
+    if (btn) btn.disabled = true;
+    document.getElementById('app').style.opacity = '0.3';
+  }
+}
+
+// 尝试初始化 Supabase（带重试机制）
+function tryInitSupabase() {
+  try {
+    var lib = _sbLib || (window.supabase && window.supabase.createClient ? window.supabase : null);
+    if (lib && typeof lib.createClient === 'function') {
+      supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // 验证是否成功（如果 supabase 是 const 会静默失败）
+      if (supabase && supabase.auth) return true;
+    }
+  } catch(e) {
+    console.error('Supabase init error:', e);
+  }
+  return false;
+}
+
+if (!tryInitSupabase()) {
+  // Supabase 库还没加载完，等待重试（最多等5秒）
+  var attempts = 0;
+  var waitInterval = setInterval(function() {
+    // 每次重试时刷新 _sbLib（备用CDN可能已加载）
+    _sbLib = (typeof supabase !== 'undefined' && supabase && supabase.createClient) ? supabase : (window.supabase || _sbLib);
+    attempts++;
+    if (tryInitSupabase() || attempts >= 50) {
+      clearInterval(waitInterval);
+      startApp();
+    }
+  }, 100);
+} else {
+  startApp();
+}
+</script>
+</body>
+</html>
