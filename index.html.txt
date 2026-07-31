@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>时光明信片 · 未来提醒</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f7f5f0;
+            font-family: 'Courier New', 'SF Mono', 'Segoe UI', monospace;
+            padding: 2rem 1rem;
+            color: #2c2b28;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: #fffef7;
+            border-radius: 32px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            border-left: 5px solid #e67e22;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e2f;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 0.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-top: 1.2rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: #5b5b55;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: #fefcf6;
+            border: 1px solid #e2e0d4;
+            border-radius: 24px;
+            transition: 0.2s;
+            outline: none;
+            color: #2c2b28;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            border-radius: 24px;
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .row > div {
+            flex: 1;
+        }
+
+        button {
+            background: #e67e22;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-family: inherit;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1.2rem;
+            width: auto;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #cf711f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #9b8e7c;
+        }
+
+        .btn-secondary:hover {
+            background: #867a68;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #5b5b55;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: #f0ede5;
+            transform: none;
+        }
+
+        .postcard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .postcard-item {
+            background: #fffcf5;
+            border-radius: 28px;
+            padding: 1.2rem;
+            border: 1px solid #ece7dc;
+            transition: 0.1s;
+        }
+
+        .postcard-message {
+            font-size: 1rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            margin-bottom: 12px;
+            font-style: italic;
+            background: #fef9e8;
+            padding: 10px 14px;
+            border-radius: 20px;
+            color: #3c3a35;
+        }
+
+        .postcard-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: #857f6e;
+            margin-bottom: 12px;
+            align-items: baseline;
+        }
+
+        .tag {
+            background: #ede9df;
+            padding: 4px 12px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .status.delivered {
+            color: #2c7a4d;
+        }
+
+        .status.waiting {
+            color: #b55b1a;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #b0a28c;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            margin-top: 0;
+            box-shadow: none;
+            text-decoration: underline;
+        }
+
+        .delete-btn:hover {
+            color: #c0392b;
+            background: none;
+            transform: none;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #b7ae9a;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #bcb6a8;
+            margin-top: 2rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e9e3d6;
+            margin: 0.8rem 0;
+        }
+
+        .notification-perm {
+            font-size: 0.7rem;
+            background: #f0ede5;
+            border-radius: 40px;
+            padding: 5px 12px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>📮 时光明信片</h1>
+        <div class="notification-perm" id="permStatus">🔔 正在请求通知权限...</div>
+        <form id="postcardForm">
+            <label>💬 写一段话 · 寄给未来的自己</label>
+            <textarea id="message" placeholder="例：30天后的你，还好吗？今天天空很蓝，记得开心。" required></textarea>
+
+            <label>📍 城市 / 地点</label>
+            <input type="text" id="city" placeholder="例如：布拉格查理大桥、成都小茶馆" value="京都·哲学之道" required>
+
+            <label>⏳ 多少天后弹出提醒？</label>
+            <input type="number" id="days" value="30" min="0" max="365" step="1">
+            <small style="display:block; margin-top:5px; color:#9b8e7c;">* 设置 0 天则会立刻提醒</small>
+
+            <button type="submit" id="sendBtn">✉️ 寄出明信片</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="flex-between">
+            <h2>📬 我的明信片册</h2>
+            <button id="clearAllBtn" class="btn-outline" style="margin:0; padding:6px 14px;">🗑️ 清空全部</button>
+        </div>
+        <div id="postcardsList" class="postcard-list">
+            <div class="empty-message">✨ 还没有明信片，写一张寄给未来吧~</div>
+        </div>
+    </div>
+    <footer>⏰ 提醒方式：浏览器通知 + 弹窗提醒（关闭页面后重新打开也会检查）。明信片数据保存在本地，不会丢失。</footer>
+</div>
+
+<script>
+    // ---------- 存储 KEY ----------
+    const STORAGE_KEY = 'time_postcards_v2';
+
+    // ---------- 全局数据 ----------
+    let postcards = [];
+
+    // ---------- 辅助函数 ----------
+    function loadData() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                postcards = JSON.parse(raw);
+                // 确保每个卡片都有 reminded 字段（旧数据迁移）
+                postcards = postcards.map(p => ({ ...p, reminded: p.reminded === true }));
+            } catch(e) { postcards = []; }
+        } else {
+            postcards = [];
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(postcards));
+    }
+
+    // 渲染所有明信片列表 (显示状态、剩余时间)
+    function renderList() {
+        const container = document.getElementById('postcardsList');
+        if (!container) return;
+
+        if (postcards.length === 0) {
+            container.innerHTML = '<div class="empty-message">📭 暂无明信片，寄出一封吧~</div>';
+            return;
+        }
+
+        const now = Date.now();
+        const itemsHtml = postcards.map(card => {
+            const isDelivered = (card.dueTime <= now);
+            const hasReminded = card.reminded;
+            let statusText = '';
+            let statusClass = '';
+            let extraInfo = '';
+
+            if (isDelivered) {
+                if (hasReminded) {
+                    statusText = '✅ 已提醒';
+                    statusClass = 'delivered';
+                } else {
+                    statusText = '🔔 已到期 · 即将提醒';
+                    statusClass = 'delivered';
+                }
+                extraInfo = ` (到期于 ${new Date(card.dueTime).toLocaleString()})`;
+            } else {
+                const remainMs = card.dueTime - now;
+                const daysLeft = Math.floor(remainMs / (1000 * 60 * 60 * 24));
+                const hoursLeft = Math.floor((remainMs % (86400000)) / (3600000));
+                if (daysLeft > 0) extraInfo = `⏳ 剩余 ${daysLeft} 天 ${hoursLeft} 小时`;
+                else if (hoursLeft > 0) extraInfo = `⏳ 剩余 ${hoursLeft} 小时`;
+                else extraInfo = `⏳ 不到1小时`;
+                statusText = '📮 旅行中';
+                statusClass = 'waiting';
+            }
+
+            // 截取过长内容
+            let shortMsg = card.message.length > 50 ? card.message.slice(0, 47) + '...' : card.message;
+
+            return `
+                <div class="postcard-item" data-id="${card.id}">
+                    <div class="postcard-message">“ ${escapeHtml(shortMsg)} ”</div>
+                    <div class="postcard-meta">
+                        <span class="tag">📍 ${escapeHtml(card.city)}</span>
+                        <span class="tag">📅 创建于 ${new Date(card.createTime).toLocaleDateString()}</span>
+                        <span class="status ${statusClass}">${statusText}</span>
+                        <span class="tag">${extraInfo}</span>
+                    </div>
+                    <div class="flex-between">
+                        <div></div>
+                        <button class="delete-btn" data-id="${card.id}">删除明信片</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = itemsHtml;
+
+        // 绑定删除按钮事件
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                deletePostcardById(id);
+            });
+        });
+    }
+
+    function deletePostcardById(id) {
+        const index = postcards.findIndex(p => p.id == id);
+        if (index !== -1) {
+            postcards.splice(index, 1);
+            saveData();
+            renderList();
+            // 删除后重新检查一次提醒（不需要额外提醒，但刷新列表即可）
+        }
+    }
+
+    function clearAllPostcards() {
+        if (confirm('⚠️ 永久删除所有明信片，包括未到期的。确定吗？')) {
+            postcards = [];
+            saveData();
+            renderList();
+        }
+    }
+
+    // 提醒核心：批量弹出通知（支持通知API + alert回退）
+    async function batchRemind(deliveredCards) {
+        if (!deliveredCards.length) return false;
+        
+        // 准备提醒内容
+        let reminderText = `🎉 你有 ${deliveredCards.length} 张时光明信片已送达！\\n\\n`;
+        deliveredCards.forEach((card, idx) => {
+            reminderText += `${idx+1}. 来自「${card.city}」\\n   “${card.message.length > 60 ? card.message.slice(0,57)+'...' : card.message}”\\n\\n`;
+        });
+        
+        // 尝试使用浏览器通知
+        let useNotification = false;
+        if (Notification.permission === 'granted') {
+            useNotification = true;
+            // 为了更好的体验，可以发送多条通知？但避免轰炸，合并成一条
+            new Notification('📮 时光明信片提醒', {
+                body: `你有 ${deliveredCards.length} 张明信片已经到达，快打开看看吧。`,
+                icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e67e22"%3E%3Cpath d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/%3E%3C/svg%3E',
+                silent: false
+            });
+            // 同时也在界面上显示一个 alert 以保证醒目
+            alert(`📬 新邮件提醒！\\n${reminderText}`);
+        } else {
+            alert(`📬 明信片提醒\\n\\n${reminderText}`);
+        }
+        return true;
+    }
+
+    // 检查所有明信片，找出到期未提醒的 -> 批量提醒并标记 reminded = true
+    function checkAndNotify() {
+        const now = Date.now();
+        const toRemind = postcards.filter(card => card.dueTime <= now && !card.reminded);
+        if (toRemind.length === 0) return false;
+        
+        // 批量提醒
+        batchRemind(toRemind).then(() => {
+            // 标记这些卡片为已提醒
+            toRemind.forEach(card => {
+                card.reminded = true;
+            });
+            saveData();
+            renderList();   // 更新状态显示
+        }).catch(() => {
+            // 降级：即使通知出错，也标记为已提醒，防止无限循环提醒
+            toRemind.forEach(card => { card.reminded = true; });
+            saveData();
+            renderList();
+            alert('📭 提醒完成（请允许通知获得更好体验）');
+        });
+        return true;
+    }
+
+    // 添加新明信片
+    function addPostcard(message, city, days) {
+        if (!message.trim()) {
+            alert('请写一段话～');
+            return false;
+        }
+        if (!city.trim()) {
+            alert('请填写城市/地点');
+            return false;
+        }
+        const daysNum = parseInt(days, 10);
+        if (isNaN(daysNum) || daysNum < 0) {
+            alert('天数必须为大于等于0的数字');
+            return false;
+        }
+
+        const createTime = Date.now();
+        const dueTime = createTime + (daysNum * 24 * 60 * 60 * 1000);
+        const newCard = {
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 8),
+            message: message.trim(),
+            city: city.trim(),
+            days: daysNum,
+            createTime: createTime,
+            dueTime: dueTime,
+            reminded: false,
+        };
+        postcards.push(newCard);
+        saveData();
+        renderList();
+        // 新增后立刻检查一遍（如果天数=0就会立即触发提醒）
+        checkAndNotify();
+        return true;
+    }
+
+    // 请求通知权限
+    function requestNotificationPermission() {
+        if (!("Notification" in window)) {
+            document.getElementById('permStatus').innerHTML = '⚠️ 此浏览器不支持桌面通知，将使用弹窗提醒。';
+            return;
+        }
+        if (Notification.permission === 'granted') {
+            document.getElementById('permStatus').innerHTML = '🔔 通知权限已开启 · 到时会弹出提醒';
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    document.getElementById('permStatus').innerHTML = '🔔 通知权限已开启 · 到时会弹出提醒';
+                } else {
+                    document.getElementById('permStatus').innerHTML = '🔕 通知被拒绝，将改用弹窗提醒';
+                }
+            });
+        } else {
+            document.getElementById('permStatus').innerHTML = '🔕 通知已被阻止，将改用弹窗提醒';
+        }
+    }
+
+    // 页面初始化 & 定时轮询（每30秒检查一次，保证到期时提醒）
+    function initAutoCheck() {
+        checkAndNotify();      // 立即检查一次
+        setInterval(() => {
+            checkAndNotify();  // 定期检查新到期的明信片
+        }, 30000);            // 30秒检查一次，足够及时
+    }
+
+    // 简单的XSS防护
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]/g, function(c) { return c; });
+    }
+
+    // ---------- 事件绑定 ----------
+    document.getElementById('postcardForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const message = document.getElementById('message').value;
+        const city = document.getElementById('city').value;
+        const days = document.getElementById('days').value;
+        if (addPostcard(message, city, days)) {
+            // 清空表单但保留城市默认和天数默认（可选保留上次填写）
+            document.getElementById('message').value = '';
+            // 不清空城市和天数，让用户方便连续寄（看个人喜好）
+            // 为了体验，只清空内容框
+            document.getElementById('city').value = city; // 保留原城市不变也可以，但用户可自行修改
+            // 天数保留30
+            document.getElementById('days').value = 30;
+            // 提示寄出成功
+            // 不额外alert，以免打扰
+        }
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+        clearAllPostcards();
+    });
+
+    // 初始化
+    loadData();
+    renderList();
+    requestNotificationPermission();
+    initAutoCheck();
+
+    // 可选：页面可见性变化时也检查一次（例如从后台切回）
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            checkAndNotify();
+            renderList();    // 更新倒计时显示
+        }
+    });
+</script>
+</body>
+</html>
